@@ -1,5 +1,5 @@
 # 無血チェス
-<img width="537" height="450" alt="image" src="https://github.com/user-attachments/assets/54d2150f-c3d1-4ca8-a036-1b911d879f73" />
+<img width="552" height="479" alt="image" src="https://github.com/user-attachments/assets/6f5545eb-6686-47ab-b1b1-66015e1bfe8d" />
 
 ### ルール
 
