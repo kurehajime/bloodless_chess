@@ -6,7 +6,7 @@ type BoardComponentProps = {
   cellSize?: number;
 };
 
-const BoardComponent = ({ board, cellSize = 96 }: BoardComponentProps) => {
+const BoardComponent = ({ board, cellSize = 144 }: BoardComponentProps) => {
   const boardSize = BOARD_SIZE * cellSize;
 
   return (
