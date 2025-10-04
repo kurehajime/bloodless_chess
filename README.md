@@ -11,3 +11,15 @@
 * 捕虜監視駒はどちらを動かしても良い
 * 捕虜のいるマスから移動して捕虜監視駒がゼロになると捕虜は解放される
 * 捕虜は解放された直後のターンに動くことはできない
+
+## 開発環境メモ（フェイズ1）
+
+- Vite + React 18 + Tailwind CSS 3 の最小構成を追加
+- `src/App.tsx` で Tailwind を使って "Hello World" を表示
+
+### セットアップ手順
+1. `npm install`
+2. `npm run dev`
+3. ブラウザで `http://localhost:5173` にアクセス
+
+※ ビルドするときは `npm run build` を実行し、ローカルで確認する場合は `npm run preview` を利用してください。
