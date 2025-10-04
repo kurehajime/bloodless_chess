@@ -1,9 +1,21 @@
-import { useMemo } from 'react';
+import { useCallback, useState } from 'react';
 import BoardComponent from './components/BoardComponent';
-import { createInitialBoard } from './game/board';
+import type { Position } from './game/board';
+import { GameManager } from './game/gameManager';
 
 function App() {
-  const board = useMemo(() => createInitialBoard(), []);
+  const [manager, setManager] = useState(() => GameManager.create());
+
+  const handleCellClick = useCallback((position: Position) => {
+    setManager((prev) => GameManager.handleCellClick(prev, position));
+  }, []);
+
+  const handlePieceSelect = useCallback((pieceIndex: number) => {
+    setManager((prev) => GameManager.selectPiece(prev, pieceIndex));
+  }, []);
+
+  const turnLabel = manager.turn === 'WHITE' ? '白の手番' : '黒の手番';
+  const winnerLabel = manager.winner === 'WHITE' ? '白の勝ち' : manager.winner === 'BLACK' ? '黒の勝ち' : null;
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-slate-950 to-black p-8 text-slate-100">
@@ -12,9 +24,21 @@ function App() {
           <h1 className="mt-2 text-4xl font-bold tracking-tight text-sky-300 drop-shadow-sm">
             無血チェス
           </h1>
+          <p className="mt-4 text-base text-slate-300">{winnerLabel ?? turnLabel}</p>
+          {!winnerLabel && (
+            <p className="mt-1 text-sm text-slate-400">
+              駒を選択して移動先のマスをクリックしてください。
+            </p>
+          )}
         </header>
         <div className="flex w-full justify-center">
-          <BoardComponent board={board} />
+          <BoardComponent
+            board={manager.board}
+            selection={manager.selection}
+            onCellClick={handleCellClick}
+            onPieceSelect={handlePieceSelect}
+            disabled={Boolean(manager.winner)}
+          />
         </div>
       </section>
     </main>

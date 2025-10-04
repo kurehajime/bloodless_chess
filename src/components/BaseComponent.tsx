@@ -1,12 +1,24 @@
+import type { MouseEvent } from 'react';
 import { Piece } from '../game/board';
 import PieceComponent from './PieceComponent';
 
 type BaseComponentProps = {
   pieces: Piece[];
   cellSize: number;
+  availablePieceIndexes?: number[];
+  selectedPieceIndex?: number | null;
+  selectionPending?: boolean;
+  onSelectPiece?: (pieceIndex: number) => void;
 };
 
-const BaseComponent = ({ pieces, cellSize }: BaseComponentProps) => {
+const BaseComponent = ({
+  pieces,
+  cellSize,
+  availablePieceIndexes = [],
+  selectedPieceIndex = null,
+  selectionPending = false,
+  onSelectPiece,
+}: BaseComponentProps) => {
   if (pieces.length === 0) {
     return null;
   }
@@ -24,6 +36,17 @@ const BaseComponent = ({ pieces, cellSize }: BaseComponentProps) => {
         const pieceX = pieces.length === 1 ? centerX : startX + index * spacing;
         const isWhite = piece.startsWith('W');
         const fill = isWhite ? '#1f2937' : '#0f172a';
+        const isSelectable = !!onSelectPiece && availablePieceIndexes.includes(index);
+        const isSelected = selectedPieceIndex === index;
+        const shouldGlow = selectionPending && isSelectable && selectedPieceIndex === null;
+
+        const handleClick = (event: MouseEvent<SVGGElement>) => {
+          event.stopPropagation();
+          if (isSelectable && onSelectPiece) {
+            onSelectPiece(index);
+          }
+        };
+
         return (
           <PieceComponent
             key={`${piece}-${index}`}
@@ -32,6 +55,9 @@ const BaseComponent = ({ pieces, cellSize }: BaseComponentProps) => {
             y={centerY}
             fontSize={fontSize}
             fill={fill}
+            onClick={isSelectable ? handleClick : undefined}
+            highlight={isSelected}
+            glow={shouldGlow}
           />
         );
       })}

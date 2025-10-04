@@ -1,4 +1,5 @@
 import BaseComponent from './BaseComponent';
+import CellOverlayComponent from './CellOverlayComponent';
 import JailComponent from './JailComponent';
 import { Cell } from '../game/board';
 
@@ -7,17 +8,46 @@ type CellComponentProps = {
   row: number;
   column: number;
   cellSize: number;
+  onClick?: () => void;
+  isSelected?: boolean;
+  isValidMove?: boolean;
+  selectionPending?: boolean;
+  availablePieceIndexes?: number[];
+  selectedPieceIndex?: number | null;
+  onSelectPiece?: (pieceIndex: number) => void;
+  disabled?: boolean;
 };
 
-const CellComponent = ({ cell, row, column, cellSize }: CellComponentProps) => {
+const CellComponent = ({
+  cell,
+  row,
+  column,
+  cellSize,
+  onClick,
+  isSelected = false,
+  isValidMove = false,
+  selectionPending = false,
+  availablePieceIndexes = [],
+  selectedPieceIndex = null,
+  onSelectPiece,
+  disabled = false,
+}: CellComponentProps) => {
   const x = column * cellSize;
   const y = row * cellSize;
   const isDark = (row + column) % 2 !== 0;
   const fill = isDark ? '#e2e8f0' : '#ffffff';
   const stroke = '#cbd5f5';
+  const cursor = onClick && !disabled ? 'pointer' : 'default';
+
+  const handleClick = () => {
+    if (disabled || !onClick) {
+      return;
+    }
+    onClick();
+  };
 
   return (
-    <g transform={`translate(${x} ${y})`}>
+    <g transform={`translate(${x} ${y})`} onClick={handleClick} style={{ cursor }}>
       <rect
         x={0}
         y={0}
@@ -27,8 +57,17 @@ const CellComponent = ({ cell, row, column, cellSize }: CellComponentProps) => {
         stroke={stroke}
         strokeWidth={2}
       />
-      <BaseComponent pieces={cell.base} cellSize={cellSize} />
+      {isValidMove && <CellOverlayComponent cellSize={cellSize} variant="move" />}
+      <BaseComponent
+        pieces={cell.base}
+        cellSize={cellSize}
+        availablePieceIndexes={availablePieceIndexes}
+        selectedPieceIndex={selectedPieceIndex}
+        selectionPending={selectionPending}
+        onSelectPiece={onSelectPiece}
+      />
       <JailComponent pieces={cell.jail} cellSize={cellSize} />
+      {isSelected && <CellOverlayComponent cellSize={cellSize} variant="selected" />}
     </g>
   );
 };

@@ -2,8 +2,12 @@
   "compilerOptions": {
     "composite": true,
     "module": "ESNext",
-    "moduleResolution": "Node",
-    "allowSyntheticDefaultImports": true
+    "moduleResolution": "Bundler",
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": ".",
+    "paths": {
+      "scheduler/tracing": ["./scheduler-tracing.d.ts"]
+    }
   },
   "include": ["vite.config.ts"]
 }
