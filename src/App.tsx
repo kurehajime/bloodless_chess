@@ -33,11 +33,14 @@ function App() {
         perspective: aiTurn,
       });
 
-      if (!cancelled && move) {
-        setManager((prev) => GameManager.applyMove(prev, move));
-      }
-
       if (!cancelled) {
+        if (move) {
+          setManager((prev) => GameManager.applyMove(prev, move));
+        } else {
+          // 合法手がない場合はチェックメイト（負け）
+          const opponent = manager.turn === 'WHITE' ? 'BLACK' : 'WHITE';
+          setManager((prev) => GameManager.from(prev.board, prev.turn, null, opponent));
+        }
         setIsThinking(false);
       }
     };
