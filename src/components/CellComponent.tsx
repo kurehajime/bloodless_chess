@@ -78,6 +78,8 @@ const CellComponent = ({
           pieces={cell.base}
           availableIndexes={availablePieceIndexes}
           cellSize={cellSize}
+          row={row}
+          column={column}
           onSelect={onSelectPiece}
         />
       )}

@@ -135,15 +135,14 @@ export class GameManager {
       return this.deselect(manager);
     }
 
-    const updatedSourceBase = sourceCell.base.filter((_, index) => index !== pieceIndex);
+    let updatedSourceBase = sourceCell.base.filter((_, index) => index !== pieceIndex);
     let updatedSourceJail = [...sourceCell.jail];
-    let updatedSourceWait = [...sourceCell.wait];
+    const updatedSourceWait = sourceCell.wait.filter(
+      (entry) => getPieceColor(entry.piece) !== manager.turn
+    );
 
     if (updatedSourceBase.length === 0 && updatedSourceJail.length > 0) {
-      updatedSourceWait = [
-        ...updatedSourceWait,
-        ...updatedSourceJail.map((piece) => createWaitPiece(piece)),
-      ];
+      updatedSourceBase = [...updatedSourceJail];
       updatedSourceJail = [];
     }
 
@@ -178,12 +177,9 @@ export class GameManager {
     const capturedEnemyPieces = [...enemyBase, ...enemyWaitPieces];
 
     const updatedDestinationCell: Cell = {
-      base: [movingPiece, ...friendlyBase],
+      base: [movingPiece, ...friendlyBase, ...friendlyPrisoners],
       jail: [...enemyPrisoners, ...capturedEnemyPieces],
-      wait: [
-        ...friendlyWait,
-        ...friendlyPrisoners.map((piece) => createWaitPiece(piece)),
-      ],
+      wait: [...friendlyWait],
     };
 
     boardCopy[destination.row][destination.column] = updatedDestinationCell;
