@@ -64,6 +64,10 @@ const negamax = (
   if (inCheck) {
     moves = moves.filter((move) => {
       const result = resolveMove(board, turn, winner, move);
+      // 相手の王を取って勝つ手は常に合法
+      if (result.winner === turn) {
+        return true;
+      }
       // この手を指した後も王手が続くなら違法手として除外
       return !isInCheck(result.board, turn);
     });
