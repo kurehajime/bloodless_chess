@@ -37,8 +37,6 @@ const BoardComponent = ({ board, cellSize = 96 }: BoardComponentProps) => {
         fill="none"
         stroke="#0f172a"
         strokeWidth={4}
-        rx={24}
-        ry={24}
       />
     </svg>
   );

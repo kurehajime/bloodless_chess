@@ -13,8 +13,8 @@ const CellComponent = ({ cell, row, column, cellSize }: CellComponentProps) => {
   const x = column * cellSize;
   const y = row * cellSize;
   const isDark = (row + column) % 2 !== 0;
-  const fill = isDark ? '#1e293b' : '#f8fafc';
-  const stroke = '#0f172a';
+  const fill = isDark ? '#e2e8f0' : '#ffffff';
+  const stroke = '#cbd5f5';
 
   return (
     <g transform={`translate(${x} ${y})`}>
@@ -26,14 +26,8 @@ const CellComponent = ({ cell, row, column, cellSize }: CellComponentProps) => {
         fill={fill}
         stroke={stroke}
         strokeWidth={2}
-        rx={12}
-        ry={12}
       />
-      <BaseComponent
-        pieces={cell.base}
-        cellSize={cellSize}
-        darkSquare={isDark}
-      />
+      <BaseComponent pieces={cell.base} cellSize={cellSize} />
       <JailComponent pieces={cell.jail} cellSize={cellSize} />
     </g>
   );

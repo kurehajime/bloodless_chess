@@ -1,4 +1,5 @@
 import { Piece } from '../game/board';
+import PieceComponent from './PieceComponent';
 
 type JailComponentProps = {
   pieces: Piece[];
@@ -10,22 +11,29 @@ const JailComponent = ({ pieces, cellSize }: JailComponentProps) => {
     return null;
   }
 
-  const fontSize = cellSize * 0.18;
-  const y = cellSize - cellSize * 0.18;
+  const centerX = cellSize / 2;
+  const startY = cellSize * 0.7;
+  const fontSize = cellSize * 0.28;
+  const spacing = fontSize * 0.9;
 
   return (
-    <text
-      x={cellSize / 2}
-      y={y}
-      textAnchor="middle"
-      dominantBaseline="central"
-      fontFamily="'Fira Code', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace"
-      fontSize={fontSize}
-      fontWeight={500}
-      fill="#38bdf8"
-    >
-      {`J: ${pieces.length}`}
-    </text>
+    <g>
+      {pieces.map((piece, index) => {
+        const y = startY + index * spacing;
+        const fill = piece.startsWith('W') ? '#1f2937' : '#0f172a';
+        return (
+          <PieceComponent
+            key={`${piece}-j-${index}`}
+            piece={piece}
+            x={centerX}
+            y={y}
+            fontSize={fontSize}
+            fill={fill}
+            rotation={90}
+          />
+        );
+      })}
+    </g>
   );
 };
 
