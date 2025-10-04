@@ -1,6 +1,7 @@
 import BaseComponent from './BaseComponent';
 import CellOverlayComponent from './CellOverlayComponent';
 import JailComponent from './JailComponent';
+import SelectorComponent from './SelectorComponent';
 import WaitComponent from './WaitComponent';
 import { Cell } from '../game/board';
 
@@ -47,6 +48,9 @@ const CellComponent = ({
     onClick();
   };
 
+  const showSelector =
+    selectionPending && availablePieceIndexes.length > 1 && typeof onSelectPiece === 'function';
+
   return (
     <g transform={`translate(${x} ${y})`} onClick={handleClick} style={{ cursor }}>
       <rect
@@ -66,9 +70,17 @@ const CellComponent = ({
         availablePieceIndexes={availablePieceIndexes}
         selectedPieceIndex={selectedPieceIndex}
         selectionPending={selectionPending}
-        onSelectPiece={onSelectPiece}
+        onSelectPiece={showSelector ? undefined : onSelectPiece}
       />
       <JailComponent pieces={cell.jail} cellSize={cellSize} />
+      {showSelector && onSelectPiece && (
+        <SelectorComponent
+          pieces={cell.base}
+          availableIndexes={availablePieceIndexes}
+          cellSize={cellSize}
+          onSelect={onSelectPiece}
+        />
+      )}
       {isSelected && <CellOverlayComponent cellSize={cellSize} variant="selected" />}
     </g>
   );
