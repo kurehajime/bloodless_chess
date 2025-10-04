@@ -15,7 +15,7 @@ const BoardComponent = ({ board, cellSize = 96 }: BoardComponentProps) => {
       width={boardSize}
       height={boardSize}
       viewBox={`0 0 ${boardSize} ${boardSize}`}
-      className="rounded-2xl bg-slate-800/30 shadow-2xl ring-1 ring-slate-900/40"
+      className="mx-auto block rounded-2xl bg-slate-800/30 shadow-2xl ring-1 ring-slate-900/40"
     >
       <title>無血チェスの盤面</title>
       {board.map((row, rowIndex) =>

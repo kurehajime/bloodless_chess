@@ -13,7 +13,9 @@ function App() {
             無血チェス
           </h1>
         </header>
-        <BoardComponent board={board} />
+        <div className="flex w-full justify-center">
+          <BoardComponent board={board} />
+        </div>
       </section>
     </main>
   );
