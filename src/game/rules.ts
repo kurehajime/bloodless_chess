@@ -285,3 +285,43 @@ const progressWaitPieces = (board: Board, currentPlayer: Turn, nextPlayer: Turn)
     }
   }
 };
+
+// 指定した手番のキングが王手（攻撃されている状態）かを判定する。
+export const isInCheck = (board: Board, turn: Turn): boolean => {
+  // 自分のキングの位置を探す
+  const kingPiece = turn === 'WHITE' ? 'WK' : 'BK';
+  let kingPosition: Position | null = null;
+
+  for (let row = 0; row < BOARD_SIZE; row += 1) {
+    for (let column = 0; column < BOARD_SIZE; column += 1) {
+      const cell = board[row][column];
+      if (cell.base.includes(kingPiece as Piece)) {
+        kingPosition = { row, column };
+        break;
+      }
+      // Wait状態のキングも考慮
+      if (cell.wait.some((entry) => entry.piece === kingPiece)) {
+        kingPosition = { row, column };
+        break;
+      }
+    }
+    if (kingPosition) break;
+  }
+
+  // キングが見つからない（捕虜になっている）場合は王手ではない（既に詰み）
+  if (!kingPosition) {
+    return false;
+  }
+
+  // 相手のすべての合法手を列挙し、キングの位置が含まれているかチェック
+  const enemyTurn = turn === 'WHITE' ? 'BLACK' : 'WHITE';
+  const enemyMoves = enumerateMoves(board, enemyTurn);
+
+  for (const move of enemyMoves) {
+    if (move.to.row === kingPosition.row && move.to.column === kingPosition.column) {
+      return true;
+    }
+  }
+
+  return false;
+};

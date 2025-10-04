@@ -1,5 +1,5 @@
 import { Board, Turn } from '../game/board';
-import { Move, enumerateMoves, resolveMove } from '../game/rules';
+import { Move, enumerateMoves, resolveMove, isInCheck } from '../game/rules';
 import { evaluateBoard } from '../game/evaluator';
 
 export type SearchOptions = {
@@ -57,7 +57,18 @@ const negamax = (
     return { score, nodes };
   }
 
-  const moves = enumerateMoves(board, turn);
+  let moves = enumerateMoves(board, turn);
+
+  // 王手がかかっている場合は、王手を回避しない手を除外する
+  const inCheck = isInCheck(board, turn);
+  if (inCheck) {
+    moves = moves.filter((move) => {
+      const result = resolveMove(board, turn, winner, move);
+      // この手を指した後も王手が続くなら違法手として除外
+      return !isInCheck(result.board, turn);
+    });
+  }
+
   if (moves.length === 0) {
     const score = evaluateBoard(board, turn, { perspective });
     return { score, nodes };

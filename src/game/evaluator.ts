@@ -1,5 +1,5 @@
 import { Board, Piece, Turn, getPieceColor } from './board';
-import { enumerateMoves } from './rules';
+import { enumerateMoves, isInCheck } from './rules';
 
 type EvaluationOptions = {
   perspective: Turn;
@@ -33,7 +33,19 @@ export const evaluateBoard = (board: Board, turn: Turn, options: EvaluationOptio
     return 10000;
   }
 
-  return baseScore + kingSafety;
+  // 王手がかかっている場合は大幅に減点
+  const perspectiveInCheck = isInCheck(board, perspective);
+  const enemyInCheck = isInCheck(board, enemyTurn);
+
+  let checkPenalty = 0;
+  if (perspectiveInCheck) {
+    checkPenalty -= 5000;
+  }
+  if (enemyInCheck) {
+    checkPenalty += 5000;
+  }
+
+  return baseScore + kingSafety + checkPenalty;
 };
 
 // Base/Waitにある駒数からスコアを算出する。
