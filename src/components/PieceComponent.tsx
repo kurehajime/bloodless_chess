@@ -22,6 +22,7 @@ type PieceComponentProps = {
   onClick?: (event: MouseEvent<SVGGElement>) => void;
   highlight?: boolean;
   glow?: boolean;
+  opacity?: number;
 };
 
 const PieceComponent = ({
@@ -34,6 +35,7 @@ const PieceComponent = ({
   onClick,
   highlight = false,
   glow = false,
+  opacity = 1,
 }: PieceComponentProps) => {
   const symbol = PIECE_SYMBOLS[piece];
   const radius = fontSize * 0.68;
@@ -71,6 +73,8 @@ const PieceComponent = ({
         fontSize={fontSize}
         fontWeight={600}
         fill={fill}
+        fillOpacity={opacity}
+        opacity={opacity}
       >
         {symbol}
       </text>

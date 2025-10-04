@@ -13,9 +13,17 @@ export type Piece =
 export type Base = Piece[];
 export type Jail = Piece[];
 
+export type WaitPiece = {
+  piece: Piece;
+  remainingSkips: number;
+};
+
+export type Wait = WaitPiece[];
+
 export type Cell = {
   base: Base;
   jail: Jail;
+  wait: Wait;
 };
 
 export type Board = Cell[][];
@@ -27,11 +35,12 @@ export type Position = {
 
 export type Turn = 'WHITE' | 'BLACK';
 
-export const createEmptyCell = (): Cell => ({ base: [], jail: [] });
+export const createEmptyCell = (): Cell => ({ base: [], jail: [], wait: [] });
 
 export const cloneCell = (cell: Cell): Cell => ({
   base: [...cell.base],
   jail: [...cell.jail],
+  wait: cell.wait.map((entry) => ({ ...entry })),
 });
 
 export const cloneBoard = (board: Board): Board =>
@@ -42,15 +51,15 @@ export const createInitialBoard = (): Board => {
     Array.from({ length: BOARD_SIZE }, () => createEmptyCell())
   );
 
-  board[0][0] = { base: ['WB'], jail: [] };
-  board[0][1] = { base: ['WN'], jail: [] };
-  board[0][2] = { base: ['WK'], jail: [] };
-  board[0][3] = { base: ['WR'], jail: [] };
+  board[0][0] = { base: ['WB'], jail: [], wait: [] };
+  board[0][1] = { base: ['WN'], jail: [], wait: [] };
+  board[0][2] = { base: ['WK'], jail: [], wait: [] };
+  board[0][3] = { base: ['WR'], jail: [], wait: [] };
 
-  board[3][0] = { base: ['BR'], jail: [] };
-  board[3][1] = { base: ['BK'], jail: [] };
-  board[3][2] = { base: ['BN'], jail: [] };
-  board[3][3] = { base: ['BB'], jail: [] };
+  board[3][0] = { base: ['BR'], jail: [], wait: [] };
+  board[3][1] = { base: ['BK'], jail: [], wait: [] };
+  board[3][2] = { base: ['BN'], jail: [], wait: [] };
+  board[3][3] = { base: ['BB'], jail: [], wait: [] };
 
   return board;
 };
@@ -62,8 +71,11 @@ export const isInsideBoard = (row: number, column: number): boolean => {
 export const getPieceColor = (piece: Piece): Turn => (piece.startsWith('W') ? 'WHITE' : 'BLACK');
 
 export const getCellOwner = (cell: Cell): Turn | null => {
-  if (cell.base.length === 0) {
-    return null;
+  if (cell.base.length > 0) {
+    return getPieceColor(cell.base[0]);
   }
-  return getPieceColor(cell.base[0]);
+  if (cell.wait.length > 0) {
+    return getPieceColor(cell.wait[0].piece);
+  }
+  return null;
 };
