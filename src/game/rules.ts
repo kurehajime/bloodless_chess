@@ -72,10 +72,15 @@ export const resolveMove = (
 
   let updatedSourceBase = sourceCell.base.filter((_, index) => index !== move.pieceIndex);
   let updatedSourceJail = [...sourceCell.jail];
-  const updatedSourceWait = sourceCell.wait.filter((entry) => getPieceColor(entry.piece) !== turn);
+  let updatedSourceWait = sourceCell.wait.filter((entry) => getPieceColor(entry.piece) !== turn);
 
+  // 移動元で監視駒がいなくなった場合、捕虜を解放してWaitに入れる
   if (updatedSourceBase.length === 0 && updatedSourceJail.length > 0) {
-    updatedSourceBase = [...updatedSourceJail];
+    const releasedPrisoners: WaitPiece[] = updatedSourceJail.map((piece) => ({
+      piece,
+      remainingSkips: WAIT_SKIP_TURNS,
+    }));
+    updatedSourceWait = [...updatedSourceWait, ...releasedPrisoners];
     updatedSourceJail = [];
   }
 
@@ -105,10 +110,27 @@ export const resolveMove = (
 
   const capturedEnemyPieces = [...enemyBase, ...enemyWaitPieces];
 
+  // 敵のコマがいるマスに移動した場合は、捕虜をBaseに戻す（ルール11）
+  // 敵のコマがいないマスに移動した場合は、捕虜をWaitに入れる（ルール10）
+  const hasEnemyPieces = enemyBase.length > 0 || enemyWaitPieces.length > 0;
+  let releasedToBase: Piece[] = [];
+  let releasedToWait: WaitPiece[] = [];
+
+  if (hasEnemyPieces) {
+    // 敵コマがいる場合：捕虜を直接Baseへ
+    releasedToBase = friendlyPrisoners;
+  } else {
+    // 敵コマがいない場合：捕虜をWaitへ
+    releasedToWait = friendlyPrisoners.map((piece) => ({
+      piece,
+      remainingSkips: WAIT_SKIP_TURNS,
+    }));
+  }
+
   const updatedDestinationCell: Cell = {
-    base: [movingPiece, ...friendlyBase, ...friendlyPrisoners],
+    base: [movingPiece, ...friendlyBase, ...releasedToBase],
     jail: [...enemyPrisoners, ...capturedEnemyPieces],
-    wait: [...friendlyWait],
+    wait: [...friendlyWait, ...releasedToWait],
   };
 
   boardCopy[move.to.row][move.to.column] = updatedDestinationCell;
