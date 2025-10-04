@@ -1,10 +1,15 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import BoardComponent from './components/BoardComponent';
 import type { Position } from './game/board';
 import { GameManager } from './game/gameManager';
+import { GameAI } from './ai/GameAI';
+import type { Turn } from './game/board';
 
 function App() {
   const [manager, setManager] = useState(() => GameManager.create());
+  const [isThinking, setIsThinking] = useState(false);
+  const aiTurn: Turn = 'BLACK';
+  const searchDepth = 2;
 
   const handleCellClick = useCallback((position: Position) => {
     setManager((prev) => GameManager.handleCellClick(prev, position));
@@ -13,6 +18,38 @@ function App() {
   const handlePieceSelect = useCallback((pieceIndex: number) => {
     setManager((prev) => GameManager.selectPiece(prev, pieceIndex));
   }, []);
+
+  useEffect(() => {
+    if (manager.winner || manager.turn !== aiTurn || manager.selection || isThinking) {
+      return;
+    }
+
+    let cancelled = false;
+    setIsThinking(true);
+
+    const think = () => {
+      const { move } = GameAI.decide(manager.board, manager.turn, {
+        depth: searchDepth,
+        perspective: aiTurn,
+      });
+
+      if (!cancelled && move) {
+        setManager((prev) => GameManager.applyMove(prev, move));
+      }
+
+      if (!cancelled) {
+        setIsThinking(false);
+      }
+    };
+
+    const timer = window.setTimeout(think, 0);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+      setIsThinking(false);
+    };
+  }, [manager, aiTurn, isThinking]);
 
   const turnLabel = manager.turn === 'WHITE' ? '白の手番' : '黒の手番';
   const winnerLabel = manager.winner === 'WHITE' ? '白の勝ち' : manager.winner === 'BLACK' ? '黒の勝ち' : null;
@@ -37,9 +74,12 @@ function App() {
             selection={manager.selection}
             onCellClick={handleCellClick}
             onPieceSelect={handlePieceSelect}
-            disabled={Boolean(manager.winner)}
+            disabled={Boolean(manager.winner) || manager.turn === aiTurn || isThinking}
           />
         </div>
+        {!winnerLabel && isThinking && (
+          <p className="text-sm text-slate-400">AIが思考中です…</p>
+        )}
       </section>
     </main>
   );

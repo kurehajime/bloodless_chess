@@ -24,6 +24,8 @@ export type ResolveMoveResult = {
   winner: Turn | null;
 };
 
+export const WAIT_SKIP_TURNS = 1;
+
 export const enumerateMoves = (board: Board, turn: Turn): Move[] => {
   const moves: Move[] = [];
   board.forEach((row, rowIndex) => {
