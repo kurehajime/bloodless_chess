@@ -158,12 +158,15 @@ export class GameManager {
     const friendlyBase = destinationCell.base.filter((piece) => getPieceColor(piece) === manager.turn);
     const enemyBase = destinationCell.base.filter((piece) => getPieceColor(piece) !== manager.turn);
 
-    const friendlyWait = destinationCell.wait.filter(
-      (entry) => getPieceColor(entry.piece) === manager.turn
-    );
-    const enemyWait = destinationCell.wait.filter(
-      (entry) => getPieceColor(entry.piece) !== manager.turn
-    );
+    const friendlyWait: WaitPiece[] = [];
+    const enemyWaitPieces: Piece[] = [];
+    for (const entry of destinationCell.wait) {
+      if (getPieceColor(entry.piece) === manager.turn) {
+        friendlyWait.push(entry);
+      } else {
+        enemyWaitPieces.push(entry.piece);
+      }
+    }
 
     const friendlyPrisoners = destinationCell.jail.filter(
       (piece) => getPieceColor(piece) === manager.turn
@@ -172,10 +175,7 @@ export class GameManager {
       (piece) => getPieceColor(piece) !== manager.turn
     );
 
-    const capturedEnemyPieces = [
-      ...enemyBase,
-      ...enemyWait.map((entry) => entry.piece),
-    ];
+    const capturedEnemyPieces = [...enemyBase, ...enemyWaitPieces];
 
     const updatedDestinationCell: Cell = {
       base: [movingPiece, ...friendlyBase],
