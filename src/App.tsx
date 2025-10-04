@@ -10,11 +10,19 @@ function App() {
   const [manager, setManager] = useState(() => GameManager.create());
   const [isThinking, setIsThinking] = useState(false);
   const [difficulty, setDifficulty] = useState(2);
+  const [moveCount, setMoveCount] = useState(0);
   const aiTurn: Turn = 'BLACK';
   const searchDepth = getDifficultyDepth(difficulty);
 
   const handleCellClick = useCallback((position: Position) => {
-    setManager((prev) => GameManager.handleCellClick(prev, position));
+    setManager((prev) => {
+      const next = GameManager.handleCellClick(prev, position);
+      // 手が進んだ場合はカウント増加
+      if (next.turn !== prev.turn) {
+        setMoveCount((count) => count + 1);
+      }
+      return next;
+    });
   }, []);
 
   const handlePieceSelect = useCallback((pieceIndex: number) => {
@@ -42,6 +50,7 @@ function App() {
       if (!cancelled) {
         if (move) {
           setManager((prev) => GameManager.applyMove(prev, move));
+          setMoveCount((count) => count + 1);
         } else {
           // 合法手がない場合はチェックメイト（負け）
           const opponent = manager.turn === 'WHITE' ? 'BLACK' : 'WHITE';
@@ -80,7 +89,7 @@ function App() {
         <DifficultySelector
           level={difficulty}
           onLevelChange={handleDifficultyChange}
-          disabled={isThinking}
+          disabled={isThinking || moveCount > 0}
         />
         <div className="flex w-full justify-center">
           <BoardComponent
