@@ -5,6 +5,7 @@ type EvaluationOptions = {
   perspective: Turn;
 };
 
+// コマ種別ごとの基本ポイント。チェスの一般的な価値を目安に採用。
 const PIECE_VALUES: Record<string, number> = {
   R: 5,
   B: 2,
@@ -20,8 +21,9 @@ export const evaluateBoard = (board: Board, turn: Turn, options: EvaluationOptio
   const perspectiveMoves = enumerateMoves(board, perspective);
   const enemyMoves = enumerateMoves(board, enemyTurn);
 
-  const isPerspectiveCheckmated = perspectiveMoves.length === 0 && isKingCaptured(board, perspective);
-  const isEnemyCheckmated = enemyMoves.length === 0 && isKingCaptured(board, enemyTurn);
+  // キングが捕縛されているなら詰みとして極端なスコアを返す。
+  const isPerspectiveCheckmated = isKingCaptured(board, perspective);
+  const isEnemyCheckmated = isKingCaptured(board, enemyTurn);
 
   if (isPerspectiveCheckmated) {
     return -10000;
@@ -34,6 +36,7 @@ export const evaluateBoard = (board: Board, turn: Turn, options: EvaluationOptio
   return baseScore + kingSafety;
 };
 
+// Base/Waitにある駒数からスコアを算出する。
 const assessPieces = (board: Board, perspective: Turn): number => {
   let score = 0;
 
@@ -54,6 +57,7 @@ const assessPieces = (board: Board, perspective: Turn): number => {
   return score;
 };
 
+// キングが安全に移動できるマス数を評価。逃げ道が多いほどプラス。
 const assessKingMobility = (board: Board, perspective: Turn): number => {
   const enemyTurn = perspective === 'WHITE' ? 'BLACK' : 'WHITE';
   const perspectiveMoves = enumerateMoves(board, perspective);

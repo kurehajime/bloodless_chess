@@ -26,6 +26,7 @@ export type ResolveMoveResult = {
 
 export const WAIT_SKIP_TURNS = 1;
 
+// 現在の手番で生成可能な全合法手を返す。
 export const enumerateMoves = (board: Board, turn: Turn): Move[] => {
   const moves: Move[] = [];
   board.forEach((row, rowIndex) => {
@@ -54,6 +55,7 @@ export const getValidMovesForPiece = (
   return computeValidMoves(board, position, pieceIndex, turn);
 };
 
+// Moveを適用した先の盤面と次手番、勝者を返す純粋関数。
 export const resolveMove = (
   board: Board,
   turn: Turn,
