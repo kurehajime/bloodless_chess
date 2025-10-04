@@ -1,7 +1,6 @@
 import BaseComponent from './BaseComponent';
 import CellOverlayComponent from './CellOverlayComponent';
 import JailComponent from './JailComponent';
-import SelectorComponent from './SelectorComponent';
 import WaitComponent from './WaitComponent';
 import { Cell } from '../game/board';
 
@@ -73,16 +72,6 @@ const CellComponent = ({
         onSelectPiece={showSelector ? undefined : onSelectPiece}
       />
       <JailComponent pieces={cell.jail} cellSize={cellSize} />
-      {showSelector && onSelectPiece && (
-        <SelectorComponent
-          pieces={cell.base}
-          availableIndexes={availablePieceIndexes}
-          cellSize={cellSize}
-          row={row}
-          column={column}
-          onSelect={onSelectPiece}
-        />
-      )}
       {isSelected && <CellOverlayComponent cellSize={cellSize} variant="selected" />}
     </g>
   );

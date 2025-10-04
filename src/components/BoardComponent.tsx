@@ -1,6 +1,7 @@
 import { Board, BOARD_SIZE, Position } from '../game/board';
 import { SelectionState } from '../game/gameManager';
 import CellComponent from './CellComponent';
+import SelectorComponent from './SelectorComponent';
 
 type BoardComponentProps = {
   board: Board;
@@ -22,6 +23,53 @@ const BoardComponent = ({
   const boardSize = BOARD_SIZE * cellSize;
   const validMoves = selection && selection.pieceIndex !== null ? selection.validMoves : [];
   const validMoveKeys = new Set(validMoves.map((move) => `${move.row}-${move.column}`));
+  const showSelectorOverlay =
+    !disabled &&
+    !!selection &&
+    selection.pieceIndex === null &&
+    selection.availablePieceIndexes.length > 1 &&
+    typeof onPieceSelect === 'function';
+
+  const selectorOverlay = (() => {
+    if (!showSelectorOverlay || !onPieceSelect) {
+      return null;
+    }
+    const { position } = selection;
+    const originX = position.column * cellSize;
+    const originY = position.row * cellSize;
+    const cell = board[position.row][position.column];
+
+    type Direction = 'up' | 'down' | 'left' | 'right';
+    const preferredDirections: Direction[] = [];
+    const addDirection = (dir: Direction) => {
+      if (!preferredDirections.includes(dir)) {
+        preferredDirections.push(dir);
+      }
+    };
+
+    if (position.row === 0) addDirection('down');
+    if (position.row === BOARD_SIZE - 1) addDirection('up');
+    if (position.column === 0) addDirection('right');
+    if (position.column === BOARD_SIZE - 1) addDirection('left');
+    addDirection('up');
+    addDirection('down');
+    addDirection('left');
+    addDirection('right');
+
+    return (
+      <SelectorComponent
+        key="selector-overlay"
+        pieces={cell.base}
+        availableIndexes={selection.availablePieceIndexes}
+        cellSize={cellSize}
+        originX={originX}
+        originY={originY}
+        boardSize={boardSize}
+        preferredDirections={preferredDirections}
+        onSelect={onPieceSelect}
+      />
+    );
+  })();
 
   return (
     <svg
@@ -77,6 +125,7 @@ const BoardComponent = ({
           );
         })
       )}
+      {selectorOverlay}
       <rect
         x={0}
         y={0}

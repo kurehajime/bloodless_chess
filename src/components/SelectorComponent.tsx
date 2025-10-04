@@ -2,21 +2,36 @@ import type { MouseEvent } from 'react';
 import type { Piece } from '../game/board';
 import PieceComponent from './PieceComponent';
 
+type Direction = 'up' | 'down' | 'left' | 'right';
+
 type SelectorComponentProps = {
   pieces: Piece[];
   availableIndexes: number[];
   cellSize: number;
-  row: number;
-  column: number;
+  originX: number;
+  originY: number;
+  boardSize: number;
+  preferredDirections: Direction[];
   onSelect: (pieceIndex: number) => void;
+};
+
+type OverlayRect = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  direction: Direction;
+  orientation: 'horizontal' | 'vertical';
 };
 
 const SelectorComponent = ({
   pieces,
   availableIndexes,
   cellSize,
-  row,
-  column,
+  originX,
+  originY,
+  boardSize,
+  preferredDirections,
   onSelect,
 }: SelectorComponentProps) => {
   if (availableIndexes.length <= 1) {
@@ -25,37 +40,72 @@ const SelectorComponent = ({
 
   const optionWidth = cellSize * 0.52;
   const optionHeight = cellSize * 0.38;
-  const verticalGap = cellSize * 0.08;
-  const horizontalGap = cellSize * 0.08;
   const gap = cellSize * 0.06;
-  const totalWidth = optionWidth * availableIndexes.length + gap * (availableIndexes.length - 1);
-  const startX = (cellSize - totalWidth) / 2;
+  const horizontalOffset = cellSize * 0.08;
+  const verticalOffset = cellSize * 0.08;
   const fontSize = cellSize * 0.32;
 
-  const isTopRow = row === 0;
-  const isBottomRow = row === 3;
-  const isLeftColumn = column === 0;
-  const isRightColumn = column === 3;
+  const totalWidth = optionWidth * availableIndexes.length + gap * (availableIndexes.length - 1);
+  const totalHeight = optionHeight * availableIndexes.length + gap * (availableIndexes.length - 1);
 
-  const verticalPreferred = -optionHeight - verticalGap;
-  const verticalFallback = cellSize + verticalGap;
-  const horizontalPreferred = -optionWidth - horizontalGap;
-  const horizontalFallback = cellSize + horizontalGap;
+  const clamp = (value: number, min: number, max: number) =>
+    Math.min(Math.max(value, min), max);
 
-  const translate = () => {
-    if (!isTopRow) {
-      return { x: startX, y: verticalPreferred, layout: 'horizontal' } as const;
+  const computeRect = (direction: Direction, clampToBoard: boolean): OverlayRect => {
+    const orientation: OverlayRect['orientation'] =
+      direction === 'up' || direction === 'down' ? 'horizontal' : 'vertical';
+    const width = orientation === 'horizontal' ? totalWidth : optionWidth;
+    const height = orientation === 'horizontal' ? optionHeight : totalHeight;
+
+    let x: number;
+    let y: number;
+
+    switch (direction) {
+      case 'up':
+        x = originX + (cellSize - width) / 2;
+        y = originY - height - verticalOffset;
+        break;
+      case 'down':
+        x = originX + (cellSize - width) / 2;
+        y = originY + cellSize + verticalOffset;
+        break;
+      case 'left':
+        x = originX - width - horizontalOffset;
+        y = originY + (cellSize - height) / 2;
+        break;
+      case 'right':
+        x = originX + cellSize + horizontalOffset;
+        y = originY + (cellSize - height) / 2;
+        break;
     }
-    if (!isBottomRow) {
-      return { x: startX, y: verticalFallback, layout: 'horizontal' } as const;
+
+    if (clampToBoard) {
+      x = clamp(x, 0, boardSize - width);
+      y = clamp(y, 0, boardSize - height);
     }
-    if (!isLeftColumn) {
-      return { x: horizontalPreferred, y: cellSize / 2 - optionWidth / 2, layout: 'vertical-left' } as const;
-    }
-    return { x: horizontalFallback, y: cellSize / 2 - optionWidth / 2, layout: 'vertical-right' } as const;
+
+    return { x, y, width, height, direction, orientation };
   };
 
-  const position = translate();
+  const directions = Array.from(
+    new Set<Direction>([...preferredDirections, 'up', 'down', 'left', 'right'])
+  );
+
+  let overlayRect: OverlayRect | null = null;
+
+  for (const direction of directions) {
+    const rect = computeRect(direction, false);
+    if (rect.x >= 0 && rect.y >= 0 && rect.x + rect.width <= boardSize && rect.y + rect.height <= boardSize) {
+      overlayRect = rect;
+      break;
+    }
+  }
+
+  if (!overlayRect) {
+    overlayRect = computeRect(directions[0], true);
+  }
+
+  const { orientation } = overlayRect;
 
   return (
     <g style={{ pointerEvents: 'auto' }}>
@@ -64,18 +114,18 @@ const SelectorComponent = ({
         if (!piece) {
           return null;
         }
-        const x =
-          position.layout === 'horizontal'
-            ? position.x + order * (optionWidth + gap)
-            : position.x;
-        const y =
-          position.layout === 'horizontal'
-            ? position.y
-            : position.y + order * (optionWidth + gap);
-        const width = position.layout === 'horizontal' ? optionWidth : optionHeight;
-        const height = position.layout === 'horizontal' ? optionHeight : optionWidth;
-        const pieceFontSize =
-          position.layout === 'horizontal' ? fontSize : fontSize * (optionHeight / optionWidth);
+
+        const optionX =
+          orientation === 'horizontal'
+            ? overlayRect.x + order * (optionWidth + gap)
+            : overlayRect.x;
+        const optionY =
+          orientation === 'horizontal'
+            ? overlayRect.y
+            : overlayRect.y + order * (optionHeight + gap);
+        const width = orientation === 'horizontal' ? optionWidth : optionWidth;
+        const height = orientation === 'horizontal' ? optionHeight : optionHeight;
+
         const isWhite = piece.startsWith('W');
         const fill = isWhite ? '#1f2937' : '#0f172a';
 
@@ -85,13 +135,18 @@ const SelectorComponent = ({
         };
 
         return (
-          <g key={`${piece}-${pieceIndex}`} transform={`translate(${x} ${y})`} onClick={handleClick} style={{ cursor: 'pointer' }}>
+          <g
+            key={`${piece}-${pieceIndex}`}
+            transform={`translate(${optionX} ${optionY})`}
+            onClick={handleClick}
+            style={{ cursor: 'pointer' }}
+          >
             <rect
               x={0}
               y={0}
-              width={width}
-              height={height}
-              fill="rgba(15, 23, 42, 0.92)"
+              width={optionWidth}
+              height={optionHeight}
+              fill="rgba(226, 232, 240, 0.92)"
               stroke="rgba(148, 163, 184, 0.7)"
               strokeWidth={3}
               rx={12}
@@ -99,9 +154,9 @@ const SelectorComponent = ({
             />
             <PieceComponent
               piece={piece}
-              x={width / 2}
-              y={height / 2}
-              fontSize={pieceFontSize}
+              x={optionWidth / 2}
+              y={optionHeight / 2}
+              fontSize={fontSize}
               fill={fill}
             />
           </g>
