@@ -51,15 +51,15 @@ export const createInitialBoard = (): Board => {
     Array.from({ length: BOARD_SIZE }, () => createEmptyCell())
   );
 
-  board[0][0] = { base: ['WB'], jail: [], wait: [] };
-  board[0][1] = { base: ['WN'], jail: [], wait: [] };
-  board[0][2] = { base: ['WK'], jail: [], wait: [] };
-  board[0][3] = { base: ['WR'], jail: [], wait: [] };
+  board[0][0] = { base: ['BR'], jail: [], wait: [] };
+  board[0][1] = { base: ['BK'], jail: [], wait: [] };
+  board[0][2] = { base: ['BN'], jail: [], wait: [] };
+  board[0][3] = { base: ['BB'], jail: [], wait: [] };
 
-  board[3][0] = { base: ['BR'], jail: [], wait: [] };
-  board[3][1] = { base: ['BK'], jail: [], wait: [] };
-  board[3][2] = { base: ['BN'], jail: [], wait: [] };
-  board[3][3] = { base: ['BB'], jail: [], wait: [] };
+  board[3][0] = { base: ['WB'], jail: [], wait: [] };
+  board[3][1] = { base: ['WN'], jail: [], wait: [] };
+  board[3][2] = { base: ['WK'], jail: [], wait: [] };
+  board[3][3] = { base: ['WR'], jail: [], wait: [] };
 
   return board;
 };
