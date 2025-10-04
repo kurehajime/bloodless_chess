@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import BoardComponent from './components/BoardComponent';
+import DifficultySelector, { getDifficultyDepth } from './components/DifficultySelector';
 import type { Position } from './game/board';
 import { GameManager } from './game/gameManager';
 import { GameAI } from './ai/GameAI';
@@ -8,8 +9,9 @@ import type { Turn } from './game/board';
 function App() {
   const [manager, setManager] = useState(() => GameManager.create());
   const [isThinking, setIsThinking] = useState(false);
+  const [difficulty, setDifficulty] = useState(2);
   const aiTurn: Turn = 'BLACK';
-  const searchDepth = 2;
+  const searchDepth = getDifficultyDepth(difficulty);
 
   const handleCellClick = useCallback((position: Position) => {
     setManager((prev) => GameManager.handleCellClick(prev, position));
@@ -17,6 +19,10 @@ function App() {
 
   const handlePieceSelect = useCallback((pieceIndex: number) => {
     setManager((prev) => GameManager.selectPiece(prev, pieceIndex));
+  }, []);
+
+  const handleDifficultyChange = useCallback((level: number) => {
+    setDifficulty(level);
   }, []);
 
   useEffect(() => {
@@ -71,6 +77,11 @@ function App() {
             </p>
           )}
         </header>
+        <DifficultySelector
+          level={difficulty}
+          onLevelChange={handleDifficultyChange}
+          disabled={isThinking}
+        />
         <div className="flex w-full justify-center">
           <BoardComponent
             board={manager.board}
