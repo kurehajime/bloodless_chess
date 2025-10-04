@@ -1,17 +1,10 @@
+import { Board, Position, Turn, cloneBoard, createInitialBoard, getPieceColor } from './board';
+import type { Move } from './rules';
 import {
-  Board,
-  BOARD_SIZE,
-  Cell,
-  Piece,
-  Position,
-  Turn,
-  cloneBoard,
-  createInitialBoard,
-  getCellOwner,
-  getPieceColor,
-  isInsideBoard,
-  WaitPiece,
-} from './board';
+  enumerateMoves as enumerateLegalMoves,
+  getValidMovesForPiece as rulesGetValidMovesForPiece,
+  resolveMove as resolveBoardMove,
+} from './rules';
 
 export type SelectionState = {
   position: Position;
@@ -19,8 +12,6 @@ export type SelectionState = {
   pieceIndex: number | null;
   validMoves: Position[];
 };
-
-const WAIT_SKIP_TURNS = 1;
 
 export class GameManager {
   private constructor(
@@ -70,7 +61,7 @@ export class GameManager {
       return manager;
     }
 
-    const validMoves = computeValidMoves(board, position, pieceIndex, turn);
+    const validMoves = rulesGetValidMovesForPiece(board, position, pieceIndex, turn);
     const nextSelection: SelectionState = {
       position,
       availablePieceIndexes,
@@ -78,6 +69,24 @@ export class GameManager {
       validMoves,
     };
     return new GameManager(manager.board, manager.turn, nextSelection, manager.winner);
+  }
+
+  static applyMove(manager: GameManager, move: Move): GameManager {
+    const result = resolveBoardMove(manager.board, manager.turn, manager.winner, move);
+    return new GameManager(result.board, result.turn, null, result.winner);
+  }
+
+  static enumerateMoves(manager: GameManager): Move[] {
+    return enumerateLegalMoves(manager.board, manager.turn);
+  }
+
+  static getValidMovesForPiece(
+    board: Board,
+    position: Position,
+    pieceIndex: number,
+    turn: Turn
+  ): Position[] {
+    return rulesGetValidMovesForPiece(board, position, pieceIndex, turn);
   }
 
   private static selectCell(manager: GameManager, position: Position): GameManager {
@@ -100,7 +109,7 @@ export class GameManager {
 
     if (availablePieceIndexes.length === 1) {
       const pieceIndex = availablePieceIndexes[0];
-      const validMoves = computeValidMoves(board, position, pieceIndex, turn);
+      const validMoves = rulesGetValidMovesForPiece(board, position, pieceIndex, turn);
       const selection: SelectionState = {
         position,
         availablePieceIndexes,
@@ -125,74 +134,14 @@ export class GameManager {
       return manager;
     }
 
-    const source = selection.position;
-    const pieceIndex = selection.pieceIndex;
-    const boardCopy = cloneBoard(manager.board);
-    const sourceCell = boardCopy[source.row][source.column];
-    const movingPiece = sourceCell.base[pieceIndex];
-
-    if (!movingPiece) {
-      return this.deselect(manager);
-    }
-
-    let updatedSourceBase = sourceCell.base.filter((_, index) => index !== pieceIndex);
-    let updatedSourceJail = [...sourceCell.jail];
-    const updatedSourceWait = sourceCell.wait.filter(
-      (entry) => getPieceColor(entry.piece) !== manager.turn
-    );
-
-    if (updatedSourceBase.length === 0 && updatedSourceJail.length > 0) {
-      updatedSourceBase = [...updatedSourceJail];
-      updatedSourceJail = [];
-    }
-
-    boardCopy[source.row][source.column] = {
-      base: updatedSourceBase,
-      jail: updatedSourceJail,
-      wait: updatedSourceWait,
+    const move: Move = {
+      from: selection.position,
+      to: destination,
+      pieceIndex: selection.pieceIndex,
     };
 
-    const destinationCell = boardCopy[destination.row][destination.column];
-
-    const friendlyBase = destinationCell.base.filter((piece) => getPieceColor(piece) === manager.turn);
-    const enemyBase = destinationCell.base.filter((piece) => getPieceColor(piece) !== manager.turn);
-
-    const friendlyWait: WaitPiece[] = [];
-    const enemyWaitPieces: Piece[] = [];
-    for (const entry of destinationCell.wait) {
-      if (getPieceColor(entry.piece) === manager.turn) {
-        friendlyWait.push(entry);
-      } else {
-        enemyWaitPieces.push(entry.piece);
-      }
-    }
-
-    const friendlyPrisoners = destinationCell.jail.filter(
-      (piece) => getPieceColor(piece) === manager.turn
-    );
-    const enemyPrisoners = destinationCell.jail.filter(
-      (piece) => getPieceColor(piece) !== manager.turn
-    );
-
-    const capturedEnemyPieces = [...enemyBase, ...enemyWaitPieces];
-
-    const updatedDestinationCell: Cell = {
-      base: [movingPiece, ...friendlyBase, ...friendlyPrisoners],
-      jail: [...enemyPrisoners, ...capturedEnemyPieces],
-      wait: [...friendlyWait],
-    };
-
-    boardCopy[destination.row][destination.column] = updatedDestinationCell;
-
-    const enemyKing = manager.turn === 'WHITE' ? 'BK' : 'WK';
-    const didCaptureKing = updatedDestinationCell.jail.includes(enemyKing as Piece);
-
-    const winner = didCaptureKing ? manager.turn : manager.winner;
-    const nextTurn = didCaptureKing ? manager.turn : toggleTurn(manager.turn);
-
-    progressWaitPieces(boardCopy, manager.turn, nextTurn);
-
-    return new GameManager(boardCopy, nextTurn, null, winner);
+    const result = resolveBoardMove(manager.board, manager.turn, manager.winner, move);
+    return new GameManager(result.board, result.turn, null, result.winner);
   }
 
   private static deselect(manager: GameManager): GameManager {
@@ -203,166 +152,5 @@ export class GameManager {
   }
 }
 
-const toggleTurn = (turn: Turn): Turn => (turn === 'WHITE' ? 'BLACK' : 'WHITE');
-
-const positionsEqual = (a: Position, b: Position): boolean => a.row === b.row && a.column === b.column;
-
-const computeValidMoves = (board: Board, position: Position, pieceIndex: number, turn: Turn): Position[] => {
-  const cell = board[position.row][position.column];
-  const piece = cell.base[pieceIndex];
-  if (!piece) {
-    return [];
-  }
-
-  const pieceType = piece.charAt(1);
-  switch (pieceType) {
-    case 'K':
-      return computeKingMoves(board, position, turn);
-    case 'R':
-      return computeSlidingMoves(board, position, turn, [
-        [1, 0],
-        [-1, 0],
-        [0, 1],
-        [0, -1],
-      ]);
-    case 'B':
-      return computeSlidingMoves(board, position, turn, [
-        [1, 1],
-        [1, -1],
-        [-1, 1],
-        [-1, -1],
-      ]);
-    case 'N':
-      return computeKnightMoves(board, position, turn);
-    default:
-      return [];
-  }
-};
-
-const computeKingMoves = (board: Board, position: Position, turn: Turn): Position[] => {
-  const moves: Position[] = [];
-  for (let dr = -1; dr <= 1; dr += 1) {
-    for (let dc = -1; dc <= 1; dc += 1) {
-      if (dr === 0 && dc === 0) {
-        continue;
-      }
-      const row = position.row + dr;
-      const column = position.column + dc;
-      if (!isInsideBoard(row, column)) {
-        continue;
-      }
-      const cell = board[row][column];
-      const owner = getCellOwner(cell);
-      if (owner === turn) {
-        continue;
-      }
-      moves.push({ row, column });
-    }
-  }
-  return moves;
-};
-
-const computeKnightMoves = (board: Board, position: Position, turn: Turn): Position[] => {
-  const moves: Position[] = [];
-  const candidates = [
-    [2, 1],
-    [2, -1],
-    [-2, 1],
-    [-2, -1],
-    [1, 2],
-    [1, -2],
-    [-1, 2],
-    [-1, -2],
-  ];
-
-  for (const [dr, dc] of candidates) {
-    const row = position.row + dr;
-    const column = position.column + dc;
-    if (!isInsideBoard(row, column)) {
-      continue;
-    }
-    const cell = board[row][column];
-    const owner = getCellOwner(cell);
-    if (owner === turn) {
-      continue;
-    }
-    moves.push({ row, column });
-  }
-  return moves;
-};
-
-const computeSlidingMoves = (
-  board: Board,
-  position: Position,
-  turn: Turn,
-  directions: Array<[number, number]>
-): Position[] => {
-  const moves: Position[] = [];
-
-  for (const [dr, dc] of directions) {
-    let row = position.row + dr;
-    let column = position.column + dc;
-
-    while (isInsideBoard(row, column)) {
-      const cell = board[row][column];
-      const owner = getCellOwner(cell);
-
-      if (owner === turn) {
-        break;
-      }
-
-      moves.push({ row, column });
-
-      if (owner && owner !== turn) {
-        break;
-      }
-
-      row += dr;
-      column += dc;
-    }
-  }
-
-  return moves;
-};
-
-const createWaitPiece = (piece: Piece): WaitPiece => ({
-  piece,
-  remainingSkips: WAIT_SKIP_TURNS,
-});
-
-const progressWaitPieces = (board: Board, currentPlayer: Turn, nextPlayer: Turn): void => {
-  for (let row = 0; row < BOARD_SIZE; row += 1) {
-    for (let column = 0; column < BOARD_SIZE; column += 1) {
-      const cell = board[row][column];
-      if (cell.wait.length === 0) {
-        continue;
-      }
-
-      const stillWaiting: WaitPiece[] = [];
-      const readyPieces: Piece[] = [];
-
-      for (const entry of cell.wait) {
-        const owner = getPieceColor(entry.piece);
-        if (owner === currentPlayer && entry.remainingSkips <= 0) {
-          readyPieces.push(entry.piece);
-        } else {
-          stillWaiting.push(entry);
-        }
-      }
-
-      const decrementedWait = stillWaiting.map((entry) => {
-        const owner = getPieceColor(entry.piece);
-        if (owner === nextPlayer) {
-          return {
-            piece: entry.piece,
-            remainingSkips: Math.max(entry.remainingSkips - 1, 0),
-          };
-        }
-        return entry;
-      });
-
-      cell.base = [...cell.base, ...readyPieces];
-      cell.wait = decrementedWait;
-    }
-  }
-};
+const positionsEqual = (a: Position, b: Position): boolean =>
+  a.row === b.row && a.column === b.column;
