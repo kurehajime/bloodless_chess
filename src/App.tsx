@@ -125,11 +125,11 @@ function App() {
   const winnerLabel = manager.winner === 'WHITE' ? t('winner.white') : manager.winner === 'BLACK' ? t('winner.black') : null;
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-slate-950 to-black py-4 px-2 text-slate-100">
+    <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-slate-950 to-black px-0 sm:px-2 text-slate-100">
       {!gameStarted && <StartDialog onStart={handleStart} />}
       <span id="rewardWin" className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50" />
       <span id="rewardLose" className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50" />
-      <section className="flex w-full max-w-4xl flex-col items-center gap-4 rounded-3xl border border-slate-800/70 bg-slate-900/60 p-4 shadow-2xl">
+      <section className="flex w-full max-w-4xl flex-col items-center gap-4 border border-slate-800/70 bg-slate-900/60 px-4 shadow-2xl">
         <header className="text-center">
           <div className="flex items-center justify-center gap-1 mt-2">
             <img src={bloodlessIcon} alt="" className="h-16 w-16" />
