@@ -128,9 +128,12 @@ function App() {
       <span id="rewardLose" className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50" />
       <section className="flex w-full max-w-4xl flex-col items-center gap-4 rounded-3xl border border-slate-800/70 bg-slate-900/60 p-4 shadow-2xl">
         <header className="text-center">
-          <h1 className="mt-2 text-6xl font-bold tracking-tight text-sky-300 drop-shadow-sm" style={{ fontFamily: "'WDXLL Lubrifont JPN', sans-serif" }}>
-            無血チェス
-          </h1>
+          <div className="flex items-center justify-center gap-1 mt-2">
+            <img src="/src/assets/bloodless.png" alt="" className="h-16 w-16" />
+            <h1 className="text-6xl font-bold tracking-tight text-white drop-shadow-sm" style={{ fontFamily: "'WDXLL Lubrifont JPN', sans-serif" }}>
+              無血チェス
+            </h1>
+          </div>
           <p className="mt-4 text-xl text-slate-300">{winnerLabel ?? turnLabel}</p>
         </header>
         <div className="flex items-center gap-4">
