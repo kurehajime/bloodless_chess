@@ -77,10 +77,11 @@ const BoardComponent = ({
   return (
     <svg
       role="img"
-      width={boardSize}
-      height={boardSize}
+      width="100%"
+      height="100%"
       viewBox={`0 0 ${boardSize} ${boardSize}`}
       className="mx-auto block rounded-2xl bg-slate-800/30 shadow-2xl ring-1 ring-slate-900/40"
+      style={{ maxWidth: '100%', height: 'auto' }}
     >
       <title>無血チェスの盤面</title>
       {board.map((row, rowIndex) =>

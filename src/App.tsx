@@ -157,15 +157,17 @@ function App() {
             </button>
           )}
         </div>
-        <div className="flex w-full justify-center">
-          <BoardComponent
-            board={manager.board}
-            selection={manager.selection}
-            lastMove={manager.lastMove}
-            onCellClick={handleCellClick}
-            onPieceSelect={handlePieceSelect}
-            disabled={Boolean(manager.winner) || manager.turn === aiTurn || isThinking}
-          />
+        <div className="flex w-full justify-center max-w-full">
+          <div className="w-full max-w-[576px]">
+            <BoardComponent
+              board={manager.board}
+              selection={manager.selection}
+              lastMove={manager.lastMove}
+              onCellClick={handleCellClick}
+              onPieceSelect={handlePieceSelect}
+              disabled={Boolean(manager.winner) || manager.turn === aiTurn || isThinking}
+            />
+          </div>
         </div>
         <div className="mt-2">
           <RulesDescription />
