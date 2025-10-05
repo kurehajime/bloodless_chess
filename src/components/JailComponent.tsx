@@ -30,7 +30,7 @@ const JailComponent = ({ pieces, cellSize }: JailComponentProps) => {
             y={centerY}
             fontSize={fontSize}
             fill={fill}
-            rotation={90}
+            rotation={270}
           />
         );
       })}
