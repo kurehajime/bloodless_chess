@@ -123,7 +123,7 @@ function App() {
   const winnerLabel = manager.winner === 'WHITE' ? '白の勝ち' : manager.winner === 'BLACK' ? '黒の勝ち' : null;
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-slate-950 to-black p-8 text-slate-100">
+    <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-slate-950 to-black py-4 px-2 text-slate-100">
       {!gameStarted && <StartDialog onStart={handleStart} />}
       <span id="rewardWin" className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50" />
       <span id="rewardLose" className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50" />
