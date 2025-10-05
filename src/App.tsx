@@ -89,14 +89,14 @@ function App() {
       }
     };
 
-    const timer = window.setTimeout(think, 0);
+    const timer = window.setTimeout(think, 750);
 
     return () => {
       cancelled = true;
       clearTimeout(timer);
       setIsThinking(false);
     };
-  }, [manager, aiTurn, isThinking]);
+  }, [manager, aiTurn, searchDepth]);
 
   const turnLabel = manager.turn === 'WHITE' ? '白の手番' : '黒の手番';
   const winnerLabel = manager.winner === 'WHITE' ? '白の勝ち' : manager.winner === 'BLACK' ? '黒の勝ち' : null;
@@ -126,8 +126,10 @@ function App() {
             disabled={Boolean(manager.winner) || manager.turn === aiTurn || isThinking}
           />
         </div>
-        {!winnerLabel && isThinking && (
-          <p className="text-sm text-slate-400">AIが思考中です…</p>
+        {!winnerLabel && (
+          <p className={`text-sm text-slate-400 transition-opacity ${isThinking ? 'opacity-100' : 'opacity-0'}`}>
+            AIが思考中です…
+          </p>
         )}
       </section>
     </main>
