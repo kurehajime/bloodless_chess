@@ -8,6 +8,7 @@ import type { Position } from './game/board';
 import { GameManager } from './game/gameManager';
 import { GameAI } from './ai/GameAI';
 import type { Turn } from './game/board';
+import bloodlessIcon from './assets/bloodless.png';
 
 function App() {
   const [manager, setManager] = useState(() => GameManager.create());
@@ -129,7 +130,7 @@ function App() {
       <section className="flex w-full max-w-4xl flex-col items-center gap-4 rounded-3xl border border-slate-800/70 bg-slate-900/60 p-4 shadow-2xl">
         <header className="text-center">
           <div className="flex items-center justify-center gap-1 mt-2">
-            <img src="/src/assets/bloodless.png" alt="" className="h-16 w-16" />
+            <img src={bloodlessIcon} alt="" className="h-16 w-16" />
             <h1 className="text-6xl font-bold tracking-tight text-white drop-shadow-sm" style={{ fontFamily: "'WDXLL Lubrifont JPN', sans-serif" }}>
               無血チェス
             </h1>
