@@ -18,16 +18,17 @@ export class GameManager {
     public readonly board: Board,
     public readonly turn: Turn,
     public readonly selection: SelectionState | null,
-    public readonly winner: Turn | null
+    public readonly winner: Turn | null,
+    public readonly lastMove: Move | null = null
   ) {}
 
   static create(initialBoard?: Board): GameManager {
     const board = initialBoard ? cloneBoard(initialBoard) : createInitialBoard();
-    return new GameManager(board, 'WHITE', null, null);
+    return new GameManager(board, 'WHITE', null, null, null);
   }
 
-  static from(board: Board, turn: Turn, selection: SelectionState | null, winner: Turn | null) {
-    return new GameManager(cloneBoard(board), turn, selection, winner);
+  static from(board: Board, turn: Turn, selection: SelectionState | null, winner: Turn | null, lastMove: Move | null = null) {
+    return new GameManager(cloneBoard(board), turn, selection, winner, lastMove);
   }
 
   static handleCellClick(manager: GameManager, position: Position): GameManager {
@@ -68,12 +69,12 @@ export class GameManager {
       pieceIndex,
       validMoves,
     };
-    return new GameManager(manager.board, manager.turn, nextSelection, manager.winner);
+    return new GameManager(manager.board, manager.turn, nextSelection, manager.winner, manager.lastMove);
   }
 
   static applyMove(manager: GameManager, move: Move): GameManager {
     const result = resolveBoardMove(manager.board, manager.turn, manager.winner, move);
-    return new GameManager(result.board, result.turn, null, result.winner);
+    return new GameManager(result.board, result.turn, null, result.winner, move);
   }
 
   static enumerateMoves(manager: GameManager): Move[] {
@@ -116,7 +117,7 @@ export class GameManager {
         pieceIndex,
         validMoves,
       };
-      return new GameManager(board, turn, selection, manager.winner);
+      return new GameManager(board, turn, selection, manager.winner, manager.lastMove);
     }
 
     const selection: SelectionState = {
@@ -125,7 +126,7 @@ export class GameManager {
       pieceIndex: null,
       validMoves: [],
     };
-    return new GameManager(board, turn, selection, manager.winner);
+    return new GameManager(board, turn, selection, manager.winner, manager.lastMove);
   }
 
   private static moveTo(manager: GameManager, destination: Position): GameManager {
@@ -141,14 +142,14 @@ export class GameManager {
     };
 
     const result = resolveBoardMove(manager.board, manager.turn, manager.winner, move);
-    return new GameManager(result.board, result.turn, null, result.winner);
+    return new GameManager(result.board, result.turn, null, result.winner, move);
   }
 
   private static deselect(manager: GameManager): GameManager {
     if (!manager.selection) {
       return manager;
     }
-    return new GameManager(manager.board, manager.turn, null, manager.winner);
+    return new GameManager(manager.board, manager.turn, null, manager.winner, manager.lastMove);
   }
 }
 

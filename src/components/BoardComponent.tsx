@@ -1,5 +1,6 @@
 import { Board, BOARD_SIZE, Position } from '../game/board';
 import { SelectionState } from '../game/gameManager';
+import type { Move } from '../game/rules';
 import CellComponent from './CellComponent';
 import SelectorComponent from './SelectorComponent';
 
@@ -7,6 +8,7 @@ type BoardComponentProps = {
   board: Board;
   cellSize?: number;
   selection?: SelectionState | null;
+  lastMove?: Move | null;
   onCellClick?: (position: Position) => void;
   onPieceSelect?: (pieceIndex: number) => void;
   disabled?: boolean;
@@ -16,6 +18,7 @@ const BoardComponent = ({
   board,
   cellSize = 144,
   selection,
+  lastMove,
   onCellClick,
   onPieceSelect,
   disabled = false,
@@ -91,6 +94,7 @@ const BoardComponent = ({
           const availablePieceIndexes = isSelected ? selection.availablePieceIndexes : [];
           const selectedPieceIndex = isSelected ? selection.pieceIndex : null;
           const selectionPending = isSelected && selection.pieceIndex === null;
+          const isLastMoveTo = lastMove?.to.row === rowIndex && lastMove?.to.column === columnIndex;
 
           const handleCellClick = () => {
             if (disabled || !onCellClick) {
@@ -116,6 +120,7 @@ const BoardComponent = ({
               onClick={handleCellClick}
               isSelected={isSelected}
               isValidMove={isValidMove}
+              isLastMoveTo={isLastMoveTo}
               selectionPending={selectionPending}
               availablePieceIndexes={availablePieceIndexes}
               selectedPieceIndex={selectedPieceIndex}

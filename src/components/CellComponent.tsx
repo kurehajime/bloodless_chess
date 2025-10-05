@@ -12,6 +12,7 @@ type CellComponentProps = {
   onClick?: () => void;
   isSelected?: boolean;
   isValidMove?: boolean;
+  isLastMoveTo?: boolean;
   selectionPending?: boolean;
   availablePieceIndexes?: number[];
   selectedPieceIndex?: number | null;
@@ -27,6 +28,7 @@ const CellComponent = ({
   onClick,
   isSelected = false,
   isValidMove = false,
+  isLastMoveTo = false,
   selectionPending = false,
   availablePieceIndexes = [],
   selectedPieceIndex = null,
@@ -61,6 +63,16 @@ const CellComponent = ({
         stroke={stroke}
         strokeWidth={2}
       />
+      {isLastMoveTo && (
+        <rect
+          x={0}
+          y={0}
+          width={cellSize}
+          height={cellSize}
+          fill="rgb(250, 204, 21)"
+          opacity={0.25}
+        />
+      )}
       {isValidMove && <CellOverlayComponent cellSize={cellSize} variant="move" />}
       <WaitComponent waitPieces={cell.wait} cellSize={cellSize} />
       <BaseComponent

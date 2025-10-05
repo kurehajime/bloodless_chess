@@ -158,6 +158,7 @@ function App() {
           <BoardComponent
             board={manager.board}
             selection={manager.selection}
+            lastMove={manager.lastMove}
             onCellClick={handleCellClick}
             onPieceSelect={handlePieceSelect}
             disabled={Boolean(manager.winner) || manager.turn === aiTurn || isThinking}
