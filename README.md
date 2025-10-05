@@ -1,6 +1,10 @@
 # 無血チェス
 https://kurehajime.github.io/bloodless_chess/
-<img width="552" height="479" alt="image" src="https://github.com/user-attachments/assets/6f5545eb-6686-47ab-b1b1-66015e1bfe8d" />
+
+[
+<img width="843" height="784" alt="image" src="https://github.com/user-attachments/assets/79741040-9a55-4ebe-8e9c-183fa90b4f55" />
+
+](https://kurehajime.github.io/bloodless_chess/)
 
 ### ルール
 
