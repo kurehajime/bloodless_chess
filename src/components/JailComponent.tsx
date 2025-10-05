@@ -11,22 +11,23 @@ const JailComponent = ({ pieces, cellSize }: JailComponentProps) => {
     return null;
   }
 
-  const centerX = cellSize / 2;
-  const startY = cellSize * 0.7;
+  const centerY = cellSize * 0.85;
   const fontSize = cellSize * 0.28;
-  const spacing = fontSize * 0.9;
+  const spacing = fontSize * 1.1;
+  const totalWidth = (pieces.length - 1) * spacing;
+  const startX = cellSize / 2 - totalWidth / 2;
 
   return (
     <g>
       {pieces.map((piece, index) => {
-        const y = startY + index * spacing;
+        const x = startX + index * spacing;
         const fill = piece.startsWith('W') ? '#1f2937' : '#0f172a';
         return (
           <PieceComponent
             key={`${piece}-j-${index}`}
             piece={piece}
-            x={centerX}
-            y={y}
+            x={x}
+            y={centerY}
             fontSize={fontSize}
             fill={fill}
             rotation={90}
