@@ -1,3 +1,5 @@
+import RulesDescription from './RulesDescription';
+
 type StartDialogProps = {
   onStart: (difficulty: number) => void;
 };
@@ -20,14 +22,8 @@ export default function StartDialog({ onStart }: StartDialogProps) {
       <div className="mx-4 w-full max-w-lg rounded-2xl border border-slate-700 bg-slate-600/60 p-4 shadow-2xl backdrop-blur-sm">
         <h2 className="mb-6 text-center text-3xl font-bold text-sky-300">無血チェス</h2>
 
-        <div className="mb-6 rounded-lg bg-slate-800/30 p-4 text-sm text-slate-300">
-          <h3 className="mb-3 font-semibold text-slate-200">ルール</h3>
-          <ul className="space-y-2">
-            <li>• 敵の駒があるマスに進むと、その駒を捕虜にできる</li>
-            <li>• 捕虜は動けず、監視駒がいなくなると解放される</li>
-            <li>• 解放直後のターンは移動できない</li>
-            <li>• 敵のキングを捕虜にすると勝利</li>
-          </ul>
+        <div className="mb-6">
+          <RulesDescription />
         </div>
 
         <div className="mb-6">

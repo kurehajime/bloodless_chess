@@ -3,6 +3,7 @@ import { useReward } from 'react-rewards';
 import BoardComponent from './components/BoardComponent';
 import DifficultySelector, { getDifficultyDepth } from './components/DifficultySelector';
 import StartDialog from './components/StartDialog';
+import RulesDescription from './components/RulesDescription';
 import type { Position } from './game/board';
 import { GameManager } from './game/gameManager';
 import { GameAI } from './ai/GameAI';
@@ -161,6 +162,9 @@ function App() {
             onPieceSelect={handlePieceSelect}
             disabled={Boolean(manager.winner) || manager.turn === aiTurn || isThinking}
           />
+        </div>
+        <div className="mt-2">
+          <RulesDescription />
         </div>
         {!winnerLabel && (
           <p className={`text-sm text-slate-400 transition-opacity ${isThinking ? 'opacity-100' : 'opacity-0'}`}>
