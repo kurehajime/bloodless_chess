@@ -20,7 +20,7 @@ export default function StartDialog({ onStart }: StartDialogProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
       <div className="mx-4 w-full max-w-lg rounded-2xl border border-slate-700 bg-slate-600/60 p-4 shadow-2xl backdrop-blur-sm">
-        <h2 className="mb-6 text-center text-3xl font-bold text-sky-300">無血チェス</h2>
+        <h2 className="mb-6 text-center text-6xl font-bold text-sky-300" style={{ fontFamily: "'WDXLL Lubrifont JPN', sans-serif" }}>無血チェス</h2>
 
         <div className="mb-6">
           <RulesDescription />

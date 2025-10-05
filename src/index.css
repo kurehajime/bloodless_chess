@@ -9,6 +9,13 @@
   font-style: normal;
 }
 
+@font-face {
+  font-family: 'WDXLL Lubrifont JPN';
+  src: url('./assets/fonts/WDXLLubrifontJPN-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 :root {
   color-scheme: light dark;
 }
