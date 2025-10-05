@@ -37,7 +37,7 @@ export default function StartDialog({ onStart }: StartDialogProps) {
               <button
                 key={item.level}
                 onClick={() => handleStart(item.level)}
-                className="rounded-lg bg-slate-700 px-5 py-3 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-200 hover:text-slate-900"
+                className="rounded-lg border border-slate-500 bg-slate-700 px-5 py-3 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-200 hover:text-slate-900"
               >
                 {item.label}
               </button>
