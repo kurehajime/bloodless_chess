@@ -126,7 +126,7 @@ function App() {
       {!gameStarted && <StartDialog onStart={handleStart} />}
       <span id="rewardWin" className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50" />
       <span id="rewardLose" className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50" />
-      <section className="flex w-full max-w-4xl flex-col items-center gap-8 rounded-3xl border border-slate-800/70 bg-slate-900/60 p-10 shadow-2xl">
+      <section className="flex w-full max-w-4xl flex-col items-center gap-4 rounded-3xl border border-slate-800/70 bg-slate-900/60 p-4 shadow-2xl">
         <header className="text-center">
           <h1 className="mt-2 text-4xl font-bold tracking-tight text-sky-300 drop-shadow-sm">
             無血チェス
