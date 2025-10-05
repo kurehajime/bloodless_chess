@@ -34,8 +34,7 @@ const BaseComponent = ({
     <g>
       {pieces.map((piece, index) => {
         const pieceX = pieces.length === 1 ? centerX : startX + index * spacing;
-        const isWhite = piece.startsWith('W');
-        const fill = isWhite ? '#1f2937' : '#0f172a';
+        const fill = '#0f172a';
         const isSelectable = !!onSelectPiece && availablePieceIndexes.includes(index);
         const isSelected = selectedPieceIndex === index;
         const shouldGlow = selectionPending && isSelectable && selectedPieceIndex === null;

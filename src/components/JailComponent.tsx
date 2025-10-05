@@ -21,7 +21,7 @@ const JailComponent = ({ pieces, cellSize }: JailComponentProps) => {
     <g>
       {pieces.map((piece, index) => {
         const x = startX + index * spacing;
-        const fill = piece.startsWith('W') ? '#1f2937' : '#0f172a';
+        const fill = '#0f172a';
         return (
           <PieceComponent
             key={`${piece}-j-${index}`}

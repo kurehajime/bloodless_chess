@@ -23,8 +23,7 @@ const WaitComponent = ({ waitPieces, cellSize }: WaitComponentProps) => {
       {waitPieces.map((entry, index) => {
         const pieceX = waitPieces.length === 1 ? centerX : startX + index * spacing;
         const piece = entry.piece;
-        const isWhite = piece.startsWith('W');
-        const fill = isWhite ? '#1f2937' : '#0f172a';
+        const fill = '#0f172a';
         return (
           <PieceComponent
             key={`${piece}-wait-${index}`}

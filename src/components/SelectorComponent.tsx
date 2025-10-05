@@ -126,8 +126,7 @@ const SelectorComponent = ({
         const width = orientation === 'horizontal' ? optionWidth : optionWidth;
         const height = orientation === 'horizontal' ? optionHeight : optionHeight;
 
-        const isWhite = piece.startsWith('W');
-        const fill = isWhite ? '#1f2937' : '#0f172a';
+        const fill = '#0f172a';
 
         const handleClick = (event: MouseEvent<SVGGElement>) => {
           event.stopPropagation();
