@@ -132,8 +132,26 @@ function App() {
           </h1>
           <p className="mt-4 text-xl text-slate-300">{winnerLabel ?? turnLabel}</p>
         </header>
-        <div className="text-sm text-slate-400">
-          難易度: レベル{difficulty}
+        <div className="flex items-center gap-4">
+          <div className="text-sm text-slate-400">
+            難易度: レベル{difficulty}
+          </div>
+          {!manager.winner && gameStarted && (
+            <button
+              onClick={handleResign}
+              className="rounded-lg bg-red-700 px-4 py-1 text-sm font-medium text-white transition-colors hover:bg-red-600"
+            >
+              投了
+            </button>
+          )}
+          {manager.winner && (
+            <button
+              onClick={handleReplay}
+              className="rounded-lg bg-sky-600 px-4 py-1 text-sm font-medium text-white transition-colors hover:bg-sky-500"
+            >
+              再プレイ
+            </button>
+          )}
         </div>
         <div className="flex w-full justify-center">
           <BoardComponent
@@ -143,24 +161,6 @@ function App() {
             onPieceSelect={handlePieceSelect}
             disabled={Boolean(manager.winner) || manager.turn === aiTurn || isThinking}
           />
-        </div>
-        <div className="flex gap-4">
-          {!manager.winner && gameStarted && (
-            <button
-              onClick={handleResign}
-              className="rounded-lg bg-red-700 px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-red-600"
-            >
-              投了
-            </button>
-          )}
-          {manager.winner && (
-            <button
-              onClick={handleReplay}
-              className="rounded-lg bg-sky-600 px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-sky-500"
-            >
-              再プレイ
-            </button>
-          )}
         </div>
         {!winnerLabel && (
           <p className={`text-sm text-slate-400 transition-opacity ${isThinking ? 'opacity-100' : 'opacity-0'}`}>
