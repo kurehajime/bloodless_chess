@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState, useRef } from 'react';
 import { useReward } from 'react-rewards';
 import BoardComponent from './components/BoardComponent';
 import DifficultySelector, { getDifficultyDepth } from './components/DifficultySelector';
+import StartDialog from './components/StartDialog';
 import type { Position } from './game/board';
 import { GameManager } from './game/gameManager';
 import { GameAI } from './ai/GameAI';
@@ -12,6 +13,7 @@ function App() {
   const [isThinking, setIsThinking] = useState(false);
   const [difficulty, setDifficulty] = useState(2);
   const [moveCount, setMoveCount] = useState(0);
+  const [gameStarted, setGameStarted] = useState(false);
   const aiTurn: Turn = 'BLACK';
   const searchDepth = getDifficultyDepth(difficulty);
   const prevWinnerRef = useRef<Turn | null>(null);
@@ -46,6 +48,23 @@ function App() {
 
   const handleDifficultyChange = useCallback((level: number) => {
     setDifficulty(level);
+  }, []);
+
+  const handleStart = useCallback((level: number) => {
+    setDifficulty(level);
+    setGameStarted(true);
+  }, []);
+
+  const handleResign = useCallback(() => {
+    const opponent = manager.turn === 'WHITE' ? 'BLACK' : 'WHITE';
+    setManager((prev) => GameManager.from(prev.board, prev.turn, null, opponent));
+  }, [manager.turn]);
+
+  const handleReplay = useCallback(() => {
+    setManager(GameManager.create());
+    setMoveCount(0);
+    setGameStarted(false);
+    prevWinnerRef.current = null;
   }, []);
 
   // 勝敗が確定したときに演出を実行
@@ -103,6 +122,7 @@ function App() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-slate-950 to-black p-8 text-slate-100">
+      {!gameStarted && <StartDialog onStart={handleStart} />}
       <span id="rewardWin" className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50" />
       <span id="rewardLose" className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50" />
       <section className="flex w-full max-w-4xl flex-col items-center gap-8 rounded-3xl border border-slate-800/70 bg-slate-900/60 p-10 shadow-2xl">
@@ -125,6 +145,24 @@ function App() {
             onPieceSelect={handlePieceSelect}
             disabled={Boolean(manager.winner) || manager.turn === aiTurn || isThinking}
           />
+        </div>
+        <div className="flex gap-4">
+          {!manager.winner && gameStarted && (
+            <button
+              onClick={handleResign}
+              className="rounded-lg bg-red-700 px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-red-600"
+            >
+              投了
+            </button>
+          )}
+          {manager.winner && (
+            <button
+              onClick={handleReplay}
+              className="rounded-lg bg-sky-600 px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-sky-500"
+            >
+              再プレイ
+            </button>
+          )}
         </div>
         {!winnerLabel && (
           <p className={`text-sm text-slate-400 transition-opacity ${isThinking ? 'opacity-100' : 'opacity-0'}`}>
