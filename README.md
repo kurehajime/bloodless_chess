@@ -2,8 +2,7 @@
 https://kurehajime.github.io/bloodless_chess/
 
 [
-<img width="843" height="784" alt="image" src="https://github.com/user-attachments/assets/79741040-9a55-4ebe-8e9c-183fa90b4f55" />
-
+![](https://github.com/user-attachments/assets/79741040-9a55-4ebe-8e9c-183fa90b4f55)
 ](https://kurehajime.github.io/bloodless_chess/)
 
 ### ルール
