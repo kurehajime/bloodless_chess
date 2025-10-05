@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { useReward } from 'react-rewards';
+import { useTranslation } from 'react-i18next';
 import BoardComponent from './components/BoardComponent';
 import DifficultySelector, { getDifficultyDepth } from './components/DifficultySelector';
 import StartDialog from './components/StartDialog';
@@ -11,6 +12,7 @@ import type { Turn } from './game/board';
 import bloodlessIcon from './assets/bloodless.png';
 
 function App() {
+  const { t } = useTranslation();
   const [manager, setManager] = useState(() => GameManager.create());
   const [isThinking, setIsThinking] = useState(false);
   const [difficulty, setDifficulty] = useState(2);
@@ -119,8 +121,8 @@ function App() {
     };
   }, [manager, aiTurn, searchDepth]);
 
-  const turnLabel = manager.turn === 'WHITE' ? '白の手番' : '黒の手番';
-  const winnerLabel = manager.winner === 'WHITE' ? '白の勝ち' : manager.winner === 'BLACK' ? '黒の勝ち' : null;
+  const turnLabel = manager.turn === 'WHITE' ? t('turn.white') : t('turn.black');
+  const winnerLabel = manager.winner === 'WHITE' ? t('winner.white') : manager.winner === 'BLACK' ? t('winner.black') : null;
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-slate-950 to-black py-4 px-2 text-slate-100">
@@ -132,21 +134,21 @@ function App() {
           <div className="flex items-center justify-center gap-1 mt-2">
             <img src={bloodlessIcon} alt="" className="h-16 w-16" />
             <h1 className="text-6xl font-bold tracking-tight text-white drop-shadow-sm" style={{ fontFamily: "'WDXLL Lubrifont JPN', sans-serif" }}>
-              無血チェス
+              {t('title')}
             </h1>
           </div>
           <p className="mt-4 text-xl text-slate-300">{winnerLabel ?? turnLabel}</p>
         </header>
         <div className="flex items-center gap-4">
           <div className="text-sm text-slate-400">
-            難易度: レベル{difficulty}
+            {t('difficulty.label', { level: difficulty })}
           </div>
           {!manager.winner && gameStarted && (
             <button
               onClick={handleResign}
               className="rounded-lg bg-red-700 px-4 py-1 text-sm font-medium text-white transition-colors hover:bg-red-600"
             >
-              投了
+              {t('buttons.resign')}
             </button>
           )}
           {manager.winner && (
@@ -154,7 +156,7 @@ function App() {
               onClick={handleReplay}
               className="rounded-lg bg-sky-600 px-4 py-1 text-sm font-medium text-white transition-colors hover:bg-sky-500"
             >
-              再プレイ
+              {t('buttons.replay')}
             </button>
           )}
         </div>
@@ -175,7 +177,7 @@ function App() {
         </div>
         {!winnerLabel && (
           <p className={`text-sm text-slate-400 transition-opacity ${isThinking ? 'opacity-100' : 'opacity-0'}`}>
-            AIが思考中です…
+            {t('ai.thinking')}
           </p>
         )}
       </section>

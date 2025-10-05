@@ -1,0 +1,42 @@
+{
+  "title": "Bloodless Chess",
+  "turn": {
+    "white": "White's Turn",
+    "black": "Black's Turn"
+  },
+  "winner": {
+    "white": "White Wins",
+    "black": "Black Wins"
+  },
+  "difficulty": {
+    "label": "Difficulty: Level {{level}}"
+  },
+  "buttons": {
+    "resign": "Resign",
+    "replay": "Replay"
+  },
+  "ai": {
+    "thinking": "AI is thinking..."
+  },
+  "rules": {
+    "title": "Rules",
+    "list": [
+      "Bloodless Chess is a humane chess without bloodshed",
+      "Defeated pieces become prisoners instead of dying",
+      "Capture the enemy King to win",
+      "Prisoners cannot move while captured",
+      "Prisoners are released when no guards remain",
+      "Released prisoners cannot move on the next turn"
+    ],
+    "pieces": {
+      "title": "Piece Movements",
+      "king": "Moves 1 square in any direction. Lose if captured",
+      "rook": "Moves infinitely vertically and horizontally",
+      "bishop": "Moves infinitely diagonally",
+      "knight": "Knight jump in all directions"
+    }
+  },
+  "start": {
+    "selectDifficulty": "Select Difficulty"
+  }
+}

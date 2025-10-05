@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import RulesDescription from './RulesDescription';
 import bloodlessIcon from '../assets/bloodless.png';
 
@@ -14,6 +15,7 @@ const LEVELS = [
 ];
 
 export default function StartDialog({ onStart }: StartDialogProps) {
+  const { t } = useTranslation();
   const handleStart = (level: number) => {
     onStart(level);
   };
@@ -23,7 +25,7 @@ export default function StartDialog({ onStart }: StartDialogProps) {
       <div className="mx-4 w-full max-w-lg rounded-2xl border border-slate-700 bg-slate-600/60 p-4 shadow-2xl backdrop-blur-sm">
         <div className="flex items-center justify-center gap-1 mb-6">
           <img src={bloodlessIcon} alt="" className="h-16 w-16" />
-          <h2 className="text-6xl font-bold text-white" style={{ fontFamily: "'WDXLL Lubrifont JPN', sans-serif" }}>無血チェス</h2>
+          <h2 className="text-6xl font-bold text-white" style={{ fontFamily: "'WDXLL Lubrifont JPN', sans-serif" }}>{t('title')}</h2>
         </div>
 
         <div className="mb-6">
@@ -31,7 +33,7 @@ export default function StartDialog({ onStart }: StartDialogProps) {
         </div>
 
         <div className="mb-6">
-          <h3 className="mb-3 text-center font-semibold text-slate-200">難易度を選択</h3>
+          <h3 className="mb-3 text-center font-semibold text-slate-200">{t('start.selectDifficulty')}</h3>
           <div className="flex gap-2 justify-center">
             {LEVELS.map((item) => (
               <button
