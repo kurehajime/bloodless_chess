@@ -22,14 +22,14 @@ function App() {
   const { reward: rewardWin } = useReward('rewardWin', 'confetti', {
     elementCount: 150,
     spread: 90,
-    lifetime: 200,
+    lifetime: 300,
   });
 
   const { reward: rewardLose } = useReward('rewardLose', 'emoji', {
-    emoji: ['💀', '😢', '😭'],
+    emoji: ['😢', '😭'],
     elementCount: 30,
     spread: 60,
-    lifetime: 150,
+    lifetime: 500,
   });
 
   const handleCellClick = useCallback((position: Position) => {
