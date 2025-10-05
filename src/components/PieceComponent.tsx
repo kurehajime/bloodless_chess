@@ -75,6 +75,7 @@ const PieceComponent = ({
         fill={fill}
         fillOpacity={opacity}
         opacity={opacity}
+        style={{ userSelect: 'none' }}
       >
         {symbol}
       </text>
