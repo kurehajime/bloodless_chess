@@ -132,11 +132,9 @@ function App() {
           </h1>
           <p className="mt-4 text-xl text-slate-300">{winnerLabel ?? turnLabel}</p>
         </header>
-        <DifficultySelector
-          level={difficulty}
-          onLevelChange={handleDifficultyChange}
-          disabled={isThinking || moveCount > 0}
-        />
+        <div className="text-sm text-slate-400">
+          難易度: レベル{difficulty}
+        </div>
         <div className="flex w-full justify-center">
           <BoardComponent
             board={manager.board}

@@ -17,10 +17,10 @@ export default function StartDialog({ onStart }: StartDialogProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="mx-4 w-full max-w-lg rounded-2xl border border-slate-700 bg-slate-600/60 p-4 shadow-2xl backdrop-blur-lg">
+      <div className="mx-4 w-full max-w-lg rounded-2xl border border-slate-700 bg-slate-600/60 p-4 shadow-2xl backdrop-blur-sm">
         <h2 className="mb-6 text-center text-3xl font-bold text-sky-300">無血チェス</h2>
 
-        <div className="mb-6 rounded-lg bg-slate-800/50 p-4 text-sm text-slate-300">
+        <div className="mb-6 rounded-lg bg-slate-800/30 p-4 text-sm text-slate-300">
           <h3 className="mb-3 font-semibold text-slate-200">ルール</h3>
           <ul className="space-y-2">
             <li>• 敵の駒があるマスに進むと、その駒を捕虜にできる</li>
@@ -37,7 +37,7 @@ export default function StartDialog({ onStart }: StartDialogProps) {
               <button
                 key={item.level}
                 onClick={() => handleStart(item.level)}
-                className="rounded-lg bg-slate-700 px-5 py-3 text-sm font-medium text-slate-200 transition-colors hover:bg-sky-600 hover:text-white"
+                className="rounded-lg bg-slate-700 px-5 py-3 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-200 hover:text-slate-900"
               >
                 {item.label}
               </button>
