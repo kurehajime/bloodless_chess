@@ -18,6 +18,7 @@ type CellComponentProps = {
   selectedPieceIndex?: number | null;
   onSelectPiece?: (pieceIndex: number) => void;
   disabled?: boolean;
+  inCheck?: boolean;
 };
 
 const CellComponent = ({
@@ -34,6 +35,7 @@ const CellComponent = ({
   selectedPieceIndex = null,
   onSelectPiece,
   disabled = false,
+  inCheck = false,
 }: CellComponentProps) => {
   const x = column * cellSize;
   const y = row * cellSize;
@@ -82,6 +84,7 @@ const CellComponent = ({
         selectedPieceIndex={selectedPieceIndex}
         selectionPending={selectionPending}
         onSelectPiece={showSelector ? undefined : onSelectPiece}
+        inCheck={inCheck}
       />
       <JailComponent pieces={cell.jail} cellSize={cellSize} />
       {isSelected && <CellOverlayComponent cellSize={cellSize} variant="selected" />}

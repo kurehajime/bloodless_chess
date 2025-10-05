@@ -1,6 +1,7 @@
-import { Board, BOARD_SIZE, Position } from '../game/board';
+import { Board, BOARD_SIZE, Position, Turn } from '../game/board';
 import { SelectionState } from '../game/gameManager';
 import type { Move } from '../game/rules';
+import { isInCheck } from '../game/rules';
 import CellComponent from './CellComponent';
 import SelectorComponent from './SelectorComponent';
 
@@ -12,6 +13,7 @@ type BoardComponentProps = {
   onCellClick?: (position: Position) => void;
   onPieceSelect?: (pieceIndex: number) => void;
   disabled?: boolean;
+  currentTurn?: Turn;
 };
 
 const BoardComponent = ({
@@ -22,10 +24,13 @@ const BoardComponent = ({
   onCellClick,
   onPieceSelect,
   disabled = false,
+  currentTurn,
 }: BoardComponentProps) => {
   const boardSize = BOARD_SIZE * cellSize;
   const validMoves = selection && selection.pieceIndex !== null ? selection.validMoves : [];
   const validMoveKeys = new Set(validMoves.map((move) => `${move.row}-${move.column}`));
+  const whiteInCheck = isInCheck(board, 'WHITE');
+  const blackInCheck = isInCheck(board, 'BLACK');
   const showSelectorOverlay =
     !disabled &&
     !!selection &&
@@ -110,6 +115,9 @@ const BoardComponent = ({
             onPieceSelect(pieceIndex);
           };
 
+          const cellInCheck = (whiteInCheck && cell.base.some(p => p === 'WK')) ||
+                              (blackInCheck && cell.base.some(p => p === 'BK'));
+
           return (
             <CellComponent
               key={positionKey}
@@ -126,6 +134,7 @@ const BoardComponent = ({
               selectedPieceIndex={selectedPieceIndex}
               onSelectPiece={isSelected ? handlePieceSelect : undefined}
               disabled={disabled}
+              inCheck={cellInCheck}
             />
           );
         })

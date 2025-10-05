@@ -169,6 +169,7 @@ function App() {
               onCellClick={handleCellClick}
               onPieceSelect={handlePieceSelect}
               disabled={Boolean(manager.winner) || manager.turn === aiTurn || isThinking}
+              currentTurn={manager.turn}
             />
           </div>
         </div>

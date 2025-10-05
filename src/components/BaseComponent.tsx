@@ -9,6 +9,7 @@ type BaseComponentProps = {
   selectedPieceIndex?: number | null;
   selectionPending?: boolean;
   onSelectPiece?: (pieceIndex: number) => void;
+  inCheck?: boolean;
 };
 
 const BaseComponent = ({
@@ -18,6 +19,7 @@ const BaseComponent = ({
   selectedPieceIndex = null,
   selectionPending = false,
   onSelectPiece,
+  inCheck = false,
 }: BaseComponentProps) => {
   if (pieces.length === 0) {
     return null;
@@ -57,6 +59,7 @@ const BaseComponent = ({
             onClick={isSelectable ? handleClick : undefined}
             highlight={isSelected}
             glow={shouldGlow}
+            inCheck={inCheck}
           />
         );
       })}

@@ -23,6 +23,7 @@ type PieceComponentProps = {
   highlight?: boolean;
   glow?: boolean;
   opacity?: number;
+  inCheck?: boolean;
 };
 
 const PieceComponent = ({
@@ -36,6 +37,7 @@ const PieceComponent = ({
   highlight = false,
   glow = false,
   opacity = 1,
+  inCheck = false,
 }: PieceComponentProps) => {
   const symbol = PIECE_SYMBOLS[piece];
   const radius = fontSize * 0.68;
@@ -48,11 +50,15 @@ const PieceComponent = ({
     onClick?.(event);
   };
 
+  const isKing = piece === 'WK' || piece === 'BK';
+  const shouldShake = isKing && inCheck;
+
   return (
     <g
       transform={rotation ? `rotate(${rotation} ${x} ${y})` : undefined}
       onClick={onClick ? handleClick : undefined}
       style={onClick ? { cursor: 'pointer' } : undefined}
+      className={shouldShake ? 'animate-shake' : undefined}
     >
       {(highlight || glow) && (
         <circle
