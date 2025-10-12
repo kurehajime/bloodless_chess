@@ -1,6 +1,6 @@
 import { Board, Turn } from '../game/board';
 import { Move, enumerateMoves, resolveMove, isInCheck } from '../game/rules';
-import { evaluateBoard } from '../game/evaluator';
+import { evaluateBoard, resetEvaluationCache } from '../game/evaluator';
 
 export type SearchOptions = {
   depth: number;
@@ -17,6 +17,7 @@ export class GameAI {
   // AlphaBeta(negamax)で最善手を探索する入口。UI側はここだけ呼べば良い。
   static decide(board: Board, turn: Turn, options: SearchOptions): SearchResult {
     const { depth, perspective } = options;
+    resetEvaluationCache();
     const { score, move, nodes } = negamax(board, turn, depth, perspective, null, -Infinity, Infinity);
     return {
       move: move ?? null,

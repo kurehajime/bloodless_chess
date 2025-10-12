@@ -1,5 +1,25 @@
 import { Board, Piece, Turn, getPieceColor } from './board';
-import { enumerateMoves, isInCheck } from './rules';
+import { enumerateMoves, isInCheck, Move } from './rules';
+
+const evaluationCache = new Map<string, number>();
+
+const encodeSegment = (values: readonly string[]): string => (values.length > 0 ? values.join(',') : '-');
+
+const encodeCell = (cell: Board[number][number]): string => {
+  const base = encodeSegment(cell.base);
+  const jail = encodeSegment(cell.jail);
+  const wait = cell.wait.length > 0 ? cell.wait.map((entry) => `${entry.piece}@${entry.remainingSkips}`).join(',') : '-';
+  return `${base}|${jail}|${wait}`;
+};
+
+const serializeBoard = (board: Board): string =>
+  board.map((row) => row.map((cell) => encodeCell(cell)).join('~')).join('/');
+
+const cacheKeyFor = (board: Board, perspective: Turn): string => `${serializeBoard(board)}#${perspective}`;
+
+export const resetEvaluationCache = (): void => {
+  evaluationCache.clear();
+};
 
 type EvaluationOptions = {
   perspective: Turn;
@@ -14,24 +34,29 @@ const PIECE_VALUES: Record<string, number> = {
 
 export const evaluateBoard = (board: Board, turn: Turn, options: EvaluationOptions): number => {
   const { perspective } = options;
-  const baseScore = assessPieces(board, perspective);
-  const kingSafety = assessKingMobility(board, perspective);
+  const cacheKey = cacheKeyFor(board, perspective);
+  const cached = evaluationCache.get(cacheKey);
+  if (cached !== undefined) {
+    return cached;
+  }
 
   const enemyTurn = perspective === 'WHITE' ? 'BLACK' : 'WHITE';
-  const perspectiveMoves = enumerateMoves(board, perspective);
-  const enemyMoves = enumerateMoves(board, enemyTurn);
 
   // キングが捕縛されているなら詰みとして極端なスコアを返す。
   const isPerspectiveCheckmated = isKingCaptured(board, perspective);
   const isEnemyCheckmated = isKingCaptured(board, enemyTurn);
 
   if (isPerspectiveCheckmated) {
+    evaluationCache.set(cacheKey, -10000);
     return -10000;
   }
 
   if (isEnemyCheckmated) {
+    evaluationCache.set(cacheKey, 10000);
     return 10000;
   }
+
+  const baseScore = assessPieces(board, perspective);
 
   // 王手がかかっている場合は大幅に減点
   const perspectiveInCheck = isInCheck(board, perspective);
@@ -45,7 +70,13 @@ export const evaluateBoard = (board: Board, turn: Turn, options: EvaluationOptio
     checkPenalty += 5000;
   }
 
-  return baseScore + kingSafety + checkPenalty;
+  const perspectiveMoves = enumerateMoves(board, perspective);
+  const enemyMoves = enumerateMoves(board, enemyTurn);
+  const kingSafety = assessKingMobility(board, perspective, perspectiveMoves, enemyMoves);
+
+  const total = baseScore + kingSafety + checkPenalty;
+  evaluationCache.set(cacheKey, total);
+  return total;
 };
 
 // Base/Waitにある駒数からスコアを算出する。
@@ -70,17 +101,18 @@ const assessPieces = (board: Board, perspective: Turn): number => {
 };
 
 // キングが安全に移動できるマス数を評価。逃げ道が多いほどプラス。
-const assessKingMobility = (board: Board, perspective: Turn): number => {
-  const enemyTurn = perspective === 'WHITE' ? 'BLACK' : 'WHITE';
-  const perspectiveMoves = enumerateMoves(board, perspective);
+const assessKingMobility = (
+  board: Board,
+  perspective: Turn,
+  perspectiveMoves: Move[],
+  enemyMoves: Move[]
+): number => {
   const accessibleKingSquares = perspectiveMoves.filter((move) => {
     const piece = board[move.from.row][move.from.column].base[move.pieceIndex];
     return piece?.endsWith('K') ?? false;
   });
 
-  const enemyControlSquares = new Set(
-    enumerateMoves(board, enemyTurn).map((move) => `${move.to.row}-${move.to.column}`)
-  );
+  const enemyControlSquares = new Set(enemyMoves.map((move) => `${move.to.row}-${move.to.column}`));
 
   let mobilityScore = 0;
   accessibleKingSquares.forEach((move) => {
