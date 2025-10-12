@@ -14,6 +14,7 @@ type BoardComponentProps = {
   onPieceSelect?: (pieceIndex: number) => void;
   disabled?: boolean;
   currentTurn?: Turn;
+  overlayMessage?: string | null;
 };
 
 const BoardComponent = ({
@@ -25,6 +26,7 @@ const BoardComponent = ({
   onPieceSelect,
   disabled = false,
   currentTurn,
+  overlayMessage = null,
 }: BoardComponentProps) => {
   const boardSize = BOARD_SIZE * cellSize;
   const validMoves = selection && selection.pieceIndex !== null ? selection.validMoves : [];
@@ -140,6 +142,31 @@ const BoardComponent = ({
         })
       )}
       {selectorOverlay}
+      {overlayMessage ? (
+        <g pointerEvents="none">
+          <rect
+            x={0}
+            y={0}
+            width={boardSize}
+            height={boardSize}
+            fill="rgba(15, 23, 42, 0.7)"
+          />
+          <g opacity={0.85}>
+            <text
+              x={boardSize / 2}
+              y={boardSize / 2}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              fill="white"
+              fontSize={cellSize * 0.45}
+              fontWeight={700}
+              style={{ letterSpacing: '0.08em' }}
+            >
+              {overlayMessage}
+            </text>
+          </g>
+        </g>
+      ) : null}
       <rect
         x={0}
         y={0}

@@ -123,6 +123,7 @@ function App() {
 
   const turnLabel = manager.turn === 'WHITE' ? t('turn.white') : t('turn.black');
   const winnerLabel = manager.winner === 'WHITE' ? t('winner.white') : manager.winner === 'BLACK' ? t('winner.black') : null;
+  const winnerOverlayMessage = manager.winner === 'WHITE' ? 'White Wins!' : manager.winner === 'BLACK' ? 'Black Wins!' : null;
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-slate-950 to-black px-0 sm:px-2 text-slate-100">
@@ -170,6 +171,7 @@ function App() {
               onPieceSelect={handlePieceSelect}
               disabled={Boolean(manager.winner) || manager.turn === aiTurn || isThinking}
               currentTurn={manager.turn}
+              overlayMessage={winnerOverlayMessage}
             />
           </div>
         </div>
