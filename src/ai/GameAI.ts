@@ -1,6 +1,7 @@
 import { Board, Turn } from '../game/board';
 import { Move, enumerateMoves, resolveMove, isInCheck } from '../game/rules';
 import { evaluateBoard, resetEvaluationCache } from '../game/evaluator';
+import { serializeBoard } from '../game/serialize';
 
 export type SearchOptions = {
   depth: number;
@@ -13,11 +14,29 @@ export type SearchResult = {
   nodes: number;
 };
 
+const transpositionTable = new Map<string, NegamaxResult>();
+
+const composeNegamaxKey = (
+  board: Board,
+  turn: Turn,
+  depth: number,
+  perspective: Turn,
+  winner: Winner
+): string => {
+  const winnerKey = winner ?? 'NONE';
+  return `${serializeBoard(board)}|${turn}|${depth}|${perspective}|${winnerKey}`;
+};
+
+const resetTranspositionTable = (): void => {
+  transpositionTable.clear();
+};
+
 export class GameAI {
   // AlphaBeta(negamax)で最善手を探索する入口。UI側はここだけ呼べば良い。
   static decide(board: Board, turn: Turn, options: SearchOptions): SearchResult {
     const { depth, perspective } = options;
     resetEvaluationCache();
+    resetTranspositionTable();
     const { score, move, nodes } = negamax(board, turn, depth, perspective, null, -Infinity, Infinity);
     return {
       move: move ?? null,
@@ -45,17 +64,33 @@ const negamax = (
   alpha: number,
   beta: number
 ): NegamaxResult => {
+  const cacheKey = composeNegamaxKey(board, turn, depth, perspective, winner);
+  if (depth > 0) {
+    const cached = transpositionTable.get(cacheKey);
+    if (cached) {
+      return cached;
+    }
+  }
+
   let nodes = 1;
 
   if (winner) {
     const score = winner === perspective ? 10000 : -10000;
-    return { score, nodes };
+    const result = { score, nodes };
+    if (depth > 0) {
+      transpositionTable.set(cacheKey, result);
+    }
+    return result;
   }
 
   if (depth === 0) {
     // 葉ノードでは評価関数のみでスコアを返す。
     const score = evaluateBoard(board, turn, { perspective });
-    return { score, nodes };
+    const result = { score, nodes };
+    if (depth > 0) {
+      transpositionTable.set(cacheKey, result);
+    }
+    return result;
   }
 
   let moves = enumerateMoves(board, turn);
@@ -76,7 +111,9 @@ const negamax = (
 
   if (moves.length === 0) {
     const score = evaluateBoard(board, turn, { perspective });
-    return { score, nodes };
+    const result = { score, nodes };
+    transpositionTable.set(cacheKey, result);
+    return result;
   }
 
   let bestScore = -Infinity;
@@ -144,5 +181,7 @@ const negamax = (
     }
   }
 
-  return { score: bestScore, move: bestMove, nodes };
+  const result = { score: bestScore, move: bestMove, nodes };
+  transpositionTable.set(cacheKey, result);
+  return result;
 };

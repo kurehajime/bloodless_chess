@@ -1,21 +1,8 @@
 import { Board, Piece, Turn, getPieceColor } from './board';
 import { enumerateMoves, isInCheck, Move } from './rules';
+import { composeBoardCacheKey } from './serialize';
 
 const evaluationCache = new Map<string, number>();
-
-const encodeSegment = (values: readonly string[]): string => (values.length > 0 ? values.join(',') : '-');
-
-const encodeCell = (cell: Board[number][number]): string => {
-  const base = encodeSegment(cell.base);
-  const jail = encodeSegment(cell.jail);
-  const wait = cell.wait.length > 0 ? cell.wait.map((entry) => `${entry.piece}@${entry.remainingSkips}`).join(',') : '-';
-  return `${base}|${jail}|${wait}`;
-};
-
-const serializeBoard = (board: Board): string =>
-  board.map((row) => row.map((cell) => encodeCell(cell)).join('~')).join('/');
-
-const cacheKeyFor = (board: Board, perspective: Turn): string => `${serializeBoard(board)}#${perspective}`;
 
 export const resetEvaluationCache = (): void => {
   evaluationCache.clear();
@@ -34,7 +21,7 @@ const PIECE_VALUES: Record<string, number> = {
 
 export const evaluateBoard = (board: Board, turn: Turn, options: EvaluationOptions): number => {
   const { perspective } = options;
-  const cacheKey = cacheKeyFor(board, perspective);
+  const cacheKey = composeBoardCacheKey(board, perspective);
   const cached = evaluationCache.get(cacheKey);
   if (cached !== undefined) {
     return cached;
