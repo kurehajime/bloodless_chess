@@ -15,6 +15,7 @@ type BoardComponentProps = {
   disabled?: boolean;
   currentTurn?: Turn;
   overlayMessage?: string | null;
+  onOverlayClick?: (() => void) | null;
 };
 
 const BoardComponent = ({
@@ -27,6 +28,7 @@ const BoardComponent = ({
   disabled = false,
   currentTurn,
   overlayMessage = null,
+  onOverlayClick = null,
 }: BoardComponentProps) => {
   const boardSize = BOARD_SIZE * cellSize;
   const validMoves = selection && selection.pieceIndex !== null ? selection.validMoves : [];
@@ -143,7 +145,12 @@ const BoardComponent = ({
       )}
       {selectorOverlay}
       {overlayMessage ? (
-        <g pointerEvents="none">
+        <g
+          onClick={onOverlayClick ?? undefined}
+          role={onOverlayClick ? 'button' : undefined}
+          aria-label={overlayMessage ?? undefined}
+          style={{ cursor: onOverlayClick ? 'pointer' : 'default' }}
+        >
           <rect
             x={0}
             y={0}
@@ -151,7 +158,7 @@ const BoardComponent = ({
             height={boardSize}
             fill="rgba(15, 23, 42, 0.7)"
           />
-          <g opacity={0.85}>
+          <g opacity={0.85} pointerEvents="none">
             <text
               x={boardSize / 2}
               y={boardSize / 2}
