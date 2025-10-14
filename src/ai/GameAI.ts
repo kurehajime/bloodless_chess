@@ -116,69 +116,65 @@ const negamax = (
     return result;
   }
 
-  let bestScore = -Infinity;
+  const maximizing = turn === perspective;
+  let bestScore = maximizing ? -Infinity : Infinity;
   let bestMove: Move | undefined;
   let localAlpha = alpha;
+  let localBeta = beta;
 
   for (const move of moves) {
     const result = resolveMove(board, turn, winner, move, { skipLog: true });
+    let score: number;
+
     if (result.winner) {
       // この手で勝敗が確定する場合は、現在の手番から見た評価を基準にし、
       // root視点（perspective）へ変換して即座に採用する。
       const winnerScoreFromCurrent =
         result.winner === 'DRAW' ? 0 : result.winner === turn ? 10000 : -10000;
-      const scoreForPerspective = turn === perspective ? winnerScoreFromCurrent : -winnerScoreFromCurrent;
-      if (scoreForPerspective > bestScore) {
-        bestScore = scoreForPerspective;
-        bestMove = move;
-      }
+      score = turn === perspective ? winnerScoreFromCurrent : -winnerScoreFromCurrent;
       nodes += 1;
-      localAlpha = Math.max(localAlpha, scoreForPerspective);
-      if (localAlpha >= beta) {
-        break;
+    } else {
+      // 相手の応手で即座に自分のキングが捕縛されるなら、大きく減点して避ける。
+      const opponent = result.turn;
+      const opponentMoves = enumerateMoves(result.board, opponent);
+      let immediateLoss = false;
+      for (const counter of opponentMoves) {
+        const counterResult = resolveMove(result.board, opponent, result.winner, counter, { skipLog: true });
+        if (counterResult.winner === opponent) {
+          immediateLoss = true;
+          break;
+        }
       }
-      continue;
+
+      if (immediateLoss) {
+        const lossScoreCurrent = -9999;
+        score = turn === perspective ? lossScoreCurrent : -lossScoreCurrent;
+        nodes += opponentMoves.length;
+      } else {
+        const child = negamax(result.board, result.turn, depth - 1, perspective, result.winner, localAlpha, localBeta);
+        nodes += child.nodes;
+        score = child.score;
+      }
     }
 
-    // 相手の応手で即座に自分のキングが捕縛されるなら、大きく減点して避ける。
-    const opponent = result.turn;
-    const opponentMoves = enumerateMoves(result.board, opponent);
-    let immediateLoss = false;
-    for (const counter of opponentMoves) {
-      const counterResult = resolveMove(result.board, opponent, result.winner, counter, { skipLog: true });
-      if (counterResult.winner === opponent) {
-        immediateLoss = true;
-        break;
-      }
-    }
-
-    if (immediateLoss) {
-      const lossScoreCurrent = -9999;
-      const scoreForPerspective = turn === perspective ? lossScoreCurrent : -lossScoreCurrent;
-      if (scoreForPerspective > bestScore) {
-        bestScore = scoreForPerspective;
+    if (maximizing) {
+      if (score > bestScore) {
+        bestScore = score;
         bestMove = move;
       }
-      nodes += opponentMoves.length;
-      localAlpha = Math.max(localAlpha, scoreForPerspective);
-      if (localAlpha >= beta) {
+      localAlpha = Math.max(localAlpha, score);
+      if (localAlpha >= localBeta) {
         break;
       }
-      continue;
-    }
-
-    const child = negamax(result.board, result.turn, depth - 1, perspective, result.winner, -beta, -localAlpha);
-    nodes += child.nodes;
-    const score = -child.score;
-
-    if (score > bestScore) {
-      bestScore = score;
-      bestMove = move;
-    }
-
-    localAlpha = Math.max(localAlpha, score);
-    if (localAlpha >= beta) {
-      break;
+    } else {
+      if (score < bestScore) {
+        bestScore = score;
+        bestMove = move;
+      }
+      localBeta = Math.min(localBeta, score);
+      if (localBeta <= localAlpha) {
+        break;
+      }
     }
   }
 
