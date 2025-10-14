@@ -99,7 +99,7 @@ const negamax = (
   const inCheck = isInCheck(board, turn);
   if (inCheck) {
     moves = moves.filter((move) => {
-      const result = resolveMove(board, turn, winner, move);
+      const result = resolveMove(board, turn, winner, move, { skipLog: true });
       // 相手の王を取って勝つ手は常に合法
       if (result.winner === turn) {
         return true;
@@ -121,7 +121,7 @@ const negamax = (
   let localAlpha = alpha;
 
   for (const move of moves) {
-    const result = resolveMove(board, turn, winner, move);
+    const result = resolveMove(board, turn, winner, move, { skipLog: true });
     if (result.winner) {
       // この手で勝敗が確定する場合は、現在の手番から見た評価を基準にし、
       // root視点（perspective）へ変換して即座に採用する。
@@ -144,7 +144,7 @@ const negamax = (
     const opponentMoves = enumerateMoves(result.board, opponent);
     let immediateLoss = false;
     for (const counter of opponentMoves) {
-      const counterResult = resolveMove(result.board, opponent, result.winner, counter);
+      const counterResult = resolveMove(result.board, opponent, result.winner, counter, { skipLog: true });
       if (counterResult.winner === opponent) {
         immediateLoss = true;
         break;

@@ -24,6 +24,11 @@ export type ResolveMoveResult = {
   winner: Turn | null;
 };
 
+type ResolveMoveOptions = {
+  skipCheckmateCheck?: boolean;
+  skipLog?: boolean;
+};
+
 export const WAIT_SKIP_TURNS = 1;
 
 const enumeratePseudoLegalMoves = (board: Board, turn: Turn): Move[] => {
@@ -68,8 +73,10 @@ export const resolveMove = (
   board: Board,
   turn: Turn,
   currentWinner: Turn | null,
-  move: Move
+  move: Move,
+  options: ResolveMoveOptions = {}
 ): ResolveMoveResult => {
+  const { skipCheckmateCheck = false, skipLog = false } = options;
   const boardCopy = cloneBoard(board);
   const sourceCell = boardCopy[move.from.row][move.from.column];
   const movingPiece = sourceCell.base[move.pieceIndex];
@@ -146,10 +153,21 @@ export const resolveMove = (
   const enemyKing = turn === 'WHITE' ? 'BK' : 'WK';
   const didCaptureKing = updatedDestinationCell.jail.includes(enemyKing as Piece);
 
-  const winner = didCaptureKing ? turn : currentWinner;
+  let winner = didCaptureKing ? turn : currentWinner;
   const nextTurn = didCaptureKing ? turn : toggleTurn(turn);
 
   progressWaitPieces(boardCopy, turn, nextTurn);
+
+  if (!winner && !skipCheckmateCheck) {
+    const nextPlayerMoves = enumerateMoves(boardCopy, nextTurn);
+    if (nextPlayerMoves.length === 0 && isInCheck(boardCopy, nextTurn)) {
+      winner = turn;
+    }
+  }
+
+  if (!skipLog) {
+    logBoard(boardCopy);
+  }
 
   return { board: boardCopy, turn: nextTurn, winner };
 };
@@ -357,9 +375,15 @@ export const isInCheck = (board: Board, turn: Turn): boolean => {
 };
 
 function doesMoveLeaveKingInCheck(board: Board, turn: Turn, move: Move): boolean {
-  const result = resolveMove(board, turn, null, move);
+  const result = resolveMove(board, turn, null, move, { skipCheckmateCheck: true, skipLog: true });
   if (result.winner === turn) {
     return false;
   }
   return isInCheck(result.board, turn);
 }
+
+const logBoard = (board: Board): void => {
+  const rows = board.map((row) => row.map((cell) => cell.base.join('&')).join(','));
+  // eslint-disable-next-line no-console
+  console.log(rows.join('\n'));
+};
