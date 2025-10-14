@@ -328,26 +328,26 @@ const progressWaitPieces = (board: Board, currentPlayer: Turn, nextPlayer: Turn)
 
       for (const entry of cell.wait) {
         const owner = getPieceColor(entry.piece);
-
         if (owner === currentPlayer && entry.remainingSkips <= 0) {
           readyPieces.push(entry.piece);
-          continue;
+        } else {
+          stillWaiting.push(entry);
         }
-
-        let remainingSkips = entry.remainingSkips;
-        if (owner === nextPlayer) {
-          remainingSkips = Math.max(remainingSkips - 1, 0);
-          if (remainingSkips === 0) {
-            readyPieces.push(entry.piece);
-            continue;
-          }
-        }
-
-        stillWaiting.push({ piece: entry.piece, remainingSkips });
       }
 
+      const decrementedWait = stillWaiting.map((entry) => {
+        const owner = getPieceColor(entry.piece);
+        if (owner === nextPlayer) {
+          return {
+            piece: entry.piece,
+            remainingSkips: Math.max(entry.remainingSkips - 1, 0),
+          };
+        }
+        return entry;
+      });
+
       cell.base = [...cell.base, ...readyPieces];
-      cell.wait = stillWaiting;
+      cell.wait = decrementedWait;
     }
   }
 };
