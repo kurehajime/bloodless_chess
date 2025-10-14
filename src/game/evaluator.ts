@@ -51,10 +51,10 @@ export const evaluateBoard = (board: Board, turn: Turn, options: EvaluationOptio
 
   let checkPenalty = 0;
   if (perspectiveInCheck) {
-    checkPenalty -= 5000;
+    checkPenalty -= 5;
   }
   if (enemyInCheck) {
-    checkPenalty += 5000;
+    checkPenalty += 5;
   }
 
   const perspectiveMoves = enumerateMoves(board, perspective);
