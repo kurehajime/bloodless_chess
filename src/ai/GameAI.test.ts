@@ -92,4 +92,23 @@ describe('GameAI.decide', () => {
       expect(isInCheck(resolved.board, 'BLACK')).toBe(false);
     }
   });
+
+  it('即詰みを逃さず選ぶ', () => {
+    const board = createEmptyBoard();
+    board[3][3] = cell(['WK']);
+    board[3][0] = cell(['BR']);
+    board[1][3] = cell(['BB']);
+    board[1][1] = cell(['BN']);
+    board[0][0] = cell(['BK']);
+
+    const result = GameAI.decide(board, 'BLACK', { depth: 2, perspective: 'BLACK' });
+
+    const resolved = resolveMove(board, 'BLACK', null, result.move as Move);
+    if (resolved.winner === 'BLACK') {
+      expect(resolved.winner).toBe('BLACK');
+    } else {
+      expect(isInCheck(resolved.board, 'WHITE')).toBe(true);
+      expect(enumerateMoves(resolved.board, 'WHITE')).toHaveLength(0);
+    }
+  });
 });
