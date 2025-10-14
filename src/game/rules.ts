@@ -11,6 +11,7 @@ import {
   isInsideBoard,
   WaitPiece,
 } from './board';
+import { serializeBoard } from './serialize';
 
 export type Move = {
   from: Position;
@@ -21,12 +22,14 @@ export type Move = {
 export type ResolveMoveResult = {
   board: Board;
   turn: Turn;
-  winner: Turn | null;
+  winner: Turn | null | 'DRAW';
+  repetitionCounts: Map<string, number>;
 };
 
 type ResolveMoveOptions = {
   skipCheckmateCheck?: boolean;
   skipLog?: boolean;
+  repetitionCounts?: Map<string, number>;
 };
 
 export const WAIT_SKIP_TURNS = 1;
@@ -72,17 +75,23 @@ export const getValidMovesForPiece = (
 export const resolveMove = (
   board: Board,
   turn: Turn,
-  currentWinner: Turn | null,
+  currentWinner: Turn | 'DRAW' | null,
   move: Move,
   options: ResolveMoveOptions = {}
 ): ResolveMoveResult => {
-  const { skipCheckmateCheck = false, skipLog = false } = options;
+  const { skipCheckmateCheck = false, skipLog = false, repetitionCounts: baseCounts } = options;
+  const repetitionCounts = new Map(baseCounts ?? []);
   const boardCopy = cloneBoard(board);
   const sourceCell = boardCopy[move.from.row][move.from.column];
   const movingPiece = sourceCell.base[move.pieceIndex];
 
   if (!movingPiece) {
-    return { board: boardCopy, turn, winner: currentWinner };
+    return {
+      board: boardCopy,
+      turn,
+      winner: currentWinner,
+      repetitionCounts,
+    };
   }
 
   let updatedSourceBase = sourceCell.base.filter((_, index) => index !== move.pieceIndex);
@@ -153,7 +162,7 @@ export const resolveMove = (
   const enemyKing = turn === 'WHITE' ? 'BK' : 'WK';
   const didCaptureKing = updatedDestinationCell.jail.includes(enemyKing as Piece);
 
-  let winner = didCaptureKing ? turn : currentWinner;
+  let winner: Turn | null | 'DRAW' = didCaptureKing ? turn : currentWinner;
   const nextTurn = didCaptureKing ? turn : toggleTurn(turn);
 
   progressWaitPieces(boardCopy, turn, nextTurn);
@@ -165,11 +174,20 @@ export const resolveMove = (
     }
   }
 
+  const stateKey = `${serializeBoard(boardCopy)}|${nextTurn}`;
+  const currentCount = repetitionCounts.get(stateKey) ?? 0;
+  const updatedCount = currentCount + 1;
+  repetitionCounts.set(stateKey, updatedCount);
+
+  if (!winner && updatedCount >= 3) {
+    winner = 'DRAW';
+  }
+
   if (!skipLog) {
     logBoard(boardCopy);
   }
 
-  return { board: boardCopy, turn: nextTurn, winner };
+  return { board: boardCopy, turn: nextTurn, winner, repetitionCounts };
 };
 
 const computeValidMoves = (

@@ -6,7 +6,8 @@
   },
   "winner": {
     "white": "White Wins",
-    "black": "Black Wins"
+    "black": "Black Wins",
+    "draw": "Draw"
   },
   "difficulty": {
     "label": "Difficulty: Level {{level}}"
@@ -17,6 +18,9 @@
   },
   "ai": {
     "thinking": "AI is thinking..."
+  },
+  "repetition": {
+    "label": "(Repeat position {{count}}x)"
   },
   "rules": {
     "title": "Rules",

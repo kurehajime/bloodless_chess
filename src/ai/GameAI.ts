@@ -52,7 +52,7 @@ type NegamaxResult = {
   nodes: number;
 };
 
-type Winner = Turn | null;
+type Winner = Turn | 'DRAW' | null;
 
 // negamax本体。alpha-beta枝刈りで高速化しつつ評価値を再帰的に算出する。
 const negamax = (
@@ -75,7 +75,7 @@ const negamax = (
   let nodes = 1;
 
   if (winner) {
-    const score = winner === perspective ? 10000 : -10000;
+    const score = winner === 'DRAW' ? 0 : winner === perspective ? 10000 : -10000;
     const result = { score, nodes };
     if (depth > 0) {
       transpositionTable.set(cacheKey, result);
@@ -125,7 +125,8 @@ const negamax = (
     if (result.winner) {
       // この手で勝敗が確定する場合は、現在の手番から見た評価を基準にし、
       // root視点（perspective）へ変換して即座に採用する。
-      const winnerScoreFromCurrent = result.winner === turn ? 10000 : -10000;
+      const winnerScoreFromCurrent =
+        result.winner === 'DRAW' ? 0 : result.winner === turn ? 10000 : -10000;
       const scoreForPerspective = turn === perspective ? winnerScoreFromCurrent : -winnerScoreFromCurrent;
       if (scoreForPerspective > bestScore) {
         bestScore = scoreForPerspective;

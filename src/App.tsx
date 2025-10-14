@@ -9,6 +9,7 @@ import type { Position } from './game/board';
 import { GameManager } from './game/gameManager';
 import { GameAI } from './ai/GameAI';
 import type { Turn } from './game/board';
+import { serializeBoard } from './game/serialize';
 import bloodlessIcon from './assets/bloodless.png';
 
 function App() {
@@ -20,7 +21,7 @@ function App() {
   const [gameStarted, setGameStarted] = useState(false);
   const aiTurn: Turn = 'BLACK';
   const searchDepth = getDifficultyDepth(difficulty);
-  const prevWinnerRef = useRef<Turn | null>(null);
+  const prevWinnerRef = useRef<Turn | 'DRAW' | null>(null);
 
   const { reward: rewardWin } = useReward('rewardWin', 'confetti', {
     elementCount: 150,
@@ -61,7 +62,7 @@ function App() {
 
   const handleResign = useCallback(() => {
     const opponent = manager.turn === 'WHITE' ? 'BLACK' : 'WHITE';
-    setManager((prev) => GameManager.from(prev.board, prev.turn, null, opponent));
+    setManager((prev) => GameManager.from(prev.board, prev.turn, null, opponent, prev.lastMove, prev.repetitionCounts));
   }, [manager.turn]);
 
   const handleReplay = useCallback(() => {
@@ -78,7 +79,7 @@ function App() {
       if (manager.winner === 'WHITE') {
         // 人間（白）の勝利
         rewardWin();
-      } else {
+      } else if (manager.winner === 'BLACK') {
         // AI（黒）の勝利
         rewardLose();
       }
@@ -106,7 +107,9 @@ function App() {
         } else {
           // 合法手がない場合はチェックメイト（負け）
           const opponent = manager.turn === 'WHITE' ? 'BLACK' : 'WHITE';
-          setManager((prev) => GameManager.from(prev.board, prev.turn, null, opponent));
+          setManager((prev) =>
+            GameManager.from(prev.board, prev.turn, null, opponent, prev.lastMove, prev.repetitionCounts)
+          );
         }
         setIsThinking(false);
       }
@@ -122,8 +125,27 @@ function App() {
   }, [manager, aiTurn, searchDepth]);
 
   const turnLabel = manager.turn === 'WHITE' ? t('turn.white') : t('turn.black');
-  const winnerLabel = manager.winner === 'WHITE' ? t('winner.white') : manager.winner === 'BLACK' ? t('winner.black') : null;
-  const winnerOverlayMessage = manager.winner === 'WHITE' ? 'White Wins!' : manager.winner === 'BLACK' ? 'Black Wins!' : null;
+  const winnerLabel =
+    manager.winner === 'WHITE'
+      ? t('winner.white')
+      : manager.winner === 'BLACK'
+      ? t('winner.black')
+      : manager.winner === 'DRAW'
+      ? t('winner.draw')
+      : null;
+  const winnerOverlayMessage =
+    manager.winner === 'WHITE'
+      ? 'White Wins!'
+      : manager.winner === 'BLACK'
+      ? 'Black Wins!'
+      : manager.winner === 'DRAW'
+      ? 'Draw Game'
+      : null;
+  const repetitionKey = `${serializeBoard(manager.board)}|${manager.turn}`;
+  const repetitionCount = manager.repetitionCounts.get(repetitionKey) ?? 0;
+  const repetitionLabel =
+    !manager.winner && repetitionCount >= 2 ? t('repetition.label', { count: repetitionCount }) : '';
+  const statusLabel = winnerLabel ?? `${turnLabel}${repetitionLabel ? ` ${repetitionLabel}` : ''}`;
   const overlayClickHandler = manager.winner ? handleReplay : null;
 
   return (
@@ -139,7 +161,7 @@ function App() {
               {t('title')}
             </h1>
           </div>
-          <p className="mt-4 text-xl text-slate-300">{winnerLabel ?? turnLabel}</p>
+          <p className="mt-4 text-xl text-slate-300">{statusLabel}</p>
         </header>
         <div className="flex items-center gap-4">
           <div className="text-sm text-slate-400">
