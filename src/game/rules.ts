@@ -26,8 +26,7 @@ export type ResolveMoveResult = {
 
 export const WAIT_SKIP_TURNS = 1;
 
-// 現在の手番で生成可能な全合法手を返す。
-export const enumerateMoves = (board: Board, turn: Turn): Move[] => {
+const enumeratePseudoLegalMoves = (board: Board, turn: Turn): Move[] => {
   const moves: Move[] = [];
   board.forEach((row, rowIndex) => {
     row.forEach((cell, columnIndex) => {
@@ -38,12 +37,18 @@ export const enumerateMoves = (board: Board, turn: Turn): Move[] => {
         const origin: Position = { row: rowIndex, column: columnIndex };
         const destinations = computeValidMoves(board, origin, pieceIndex, turn);
         destinations.forEach((destination) => {
-          moves.push({ from: origin, to: destination, pieceIndex });
+          const move: Move = { from: origin, to: destination, pieceIndex };
+          moves.push(move);
         });
       });
     });
   });
   return moves;
+};
+
+// 現在の手番で生成可能な全合法手を返す。
+export const enumerateMoves = (board: Board, turn: Turn): Move[] => {
+  return enumeratePseudoLegalMoves(board, turn).filter((move) => !doesMoveLeaveKingInCheck(board, turn, move));
 };
 
 export const getValidMovesForPiece = (
@@ -52,7 +57,10 @@ export const getValidMovesForPiece = (
   pieceIndex: number,
   turn: Turn
 ): Position[] => {
-  return computeValidMoves(board, position, pieceIndex, turn);
+  return computeValidMoves(board, position, pieceIndex, turn).filter((destination) => {
+    const move: Move = { from: position, to: destination, pieceIndex };
+    return !doesMoveLeaveKingInCheck(board, turn, move);
+  });
 };
 
 // Moveを適用した先の盤面と次手番、勝者を返す純粋関数。
@@ -337,7 +345,7 @@ export const isInCheck = (board: Board, turn: Turn): boolean => {
 
   // 相手のすべての合法手を列挙し、キングの位置が含まれているかチェック
   const enemyTurn = turn === 'WHITE' ? 'BLACK' : 'WHITE';
-  const enemyMoves = enumerateMoves(board, enemyTurn);
+  const enemyMoves = enumeratePseudoLegalMoves(board, enemyTurn);
 
   for (const move of enemyMoves) {
     if (move.to.row === kingPosition.row && move.to.column === kingPosition.column) {
@@ -347,3 +355,11 @@ export const isInCheck = (board: Board, turn: Turn): boolean => {
 
   return false;
 };
+
+function doesMoveLeaveKingInCheck(board: Board, turn: Turn, move: Move): boolean {
+  const result = resolveMove(board, turn, null, move);
+  if (result.winner === turn) {
+    return false;
+  }
+  return isInCheck(result.board, turn);
+}

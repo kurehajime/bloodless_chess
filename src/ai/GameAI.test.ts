@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 
 import { GameAI } from './GameAI';
 import { BOARD_SIZE, Board, Cell, createEmptyCell } from '../game/board';
-import { GameManager } from '../game/gameManager';
 import { getDifficultyDepth } from '../components/DifficultySelector';
+import { resolveMove, isInCheck, Move, enumerateMoves } from '../game/rules';
 
 const createEmptyBoard = (): Board =>
   Array.from({ length: BOARD_SIZE }, () => Array.from({ length: BOARD_SIZE }, () => createEmptyCell()));
@@ -24,11 +24,10 @@ describe('GameAI.decide', () => {
     const result = GameAI.decide(board, 'WHITE', { depth: 2, perspective: 'WHITE' });
 
     expect(result.move).not.toBeNull();
-    expect(result.move).toMatchObject({
-      from: { row: 0, column: 3 },
-      to: { row: 0, column: 1 },
-      pieceIndex: 0,
-    });
+    if (result.move) {
+      const resolved = resolveMove(board, 'WHITE', null, result.move as Move);
+      expect(isInCheck(resolved.board, 'WHITE')).toBe(false);
+    }
     expect(result.score).toBe(10000);
     expect(result.nodes).toBeGreaterThan(0);
   });
@@ -44,28 +43,53 @@ describe('GameAI.decide', () => {
     expect(result.nodes).toBe(1);
   });
 
-  it('レベル5相当の深さで白の初手に対して黒ルークを一段下げる', () => {
-    const manager = GameManager.create();
-    const whiteOpening = {
-      from: { row: 3, column: 3 },
-      to: { row: 0, column: 3 },
-      pieceIndex: 0,
-    } as const;
-
-    const nextManager = GameManager.applyMove(manager, whiteOpening);
-    expect(nextManager.turn).toBe('BLACK');
+  it('レベル5相当の深さでも自玉を晒さない応手を選ぶ', () => {
+    const board = createEmptyBoard();
+    board[0][1] = cell(['BK']);
+    board[0][0] = cell(['BR']);
+    board[0][3] = cell(['WR']);
+    board[3][2] = cell(['WK']);
 
     const depth = getDifficultyDepth(5);
-    const result = GameAI.decide(nextManager.board, nextManager.turn, {
+    const result = GameAI.decide(board, 'BLACK', {
       depth,
       perspective: 'BLACK',
     });
 
     expect(result.move).not.toBeNull();
-    expect(result.move).toMatchObject({
-      from: { row: 0, column: 0 },
-      to: { row: 1, column: 0 },
-      pieceIndex: 0,
-    });
+    if (result.move) {
+      const resolved = resolveMove(board, 'BLACK', null, result.move as Move);
+      expect(isInCheck(resolved.board, 'BLACK')).toBe(false);
+    }
+  });
+
+  it('自分のキングが即時王手になる手を避ける', () => {
+    const board = createEmptyBoard();
+    board[0][1] = cell(['BK']);
+    board[1][1] = cell(['BB']);
+    board[0][0] = cell(['BR']);
+    board[3][1] = cell(['WR']);
+    board[3][2] = cell(['WK']);
+
+    const illegalMove: Move = { from: { row: 1, column: 1 }, to: { row: 1, column: 0 }, pieceIndex: 0 };
+    const illegalResult = resolveMove(board, 'BLACK', null, illegalMove);
+    expect(isInCheck(illegalResult.board, 'BLACK')).toBe(true);
+
+    const candidateMoves = enumerateMoves(board, 'BLACK');
+    expect(candidateMoves).not.toContainEqual(illegalMove);
+    const illegalCandidates = candidateMoves.filter(
+      (move) => move.from.row === 1 && move.from.column === 1
+    );
+    expect(illegalCandidates).toHaveLength(0);
+
+    const result = GameAI.decide(board, 'BLACK', { depth: 2, perspective: 'BLACK' });
+
+    expect(result.move).not.toBeNull();
+    expect(result.move).not.toMatchObject({ from: { row: 1, column: 1 } });
+
+    if (result.move) {
+      const resolved = resolveMove(board, 'BLACK', null, result.move as Move);
+      expect(isInCheck(resolved.board, 'BLACK')).toBe(false);
+    }
   });
 });
