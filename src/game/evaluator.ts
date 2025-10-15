@@ -19,7 +19,7 @@ const PIECE_VALUES: Record<string, number> = {
   N: 3,
 };
 
-export const evaluateBoard = (board: Board, turn: Turn, options: EvaluationOptions): number => {
+export const evaluateBoard = (board: Board, options: EvaluationOptions): number => {
   const { perspective } = options;
   const cacheKey = composeBoardCacheKey(board, perspective);
   const cached = evaluationCache.get(cacheKey);

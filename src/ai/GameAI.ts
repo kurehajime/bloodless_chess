@@ -85,7 +85,7 @@ const negamax = (
 
   if (depth === 0) {
     // 葉ノードでは評価関数のみでスコアを返す。
-    const score = evaluateBoard(board, turn, { perspective });
+    const score = evaluateBoard(board, { perspective });
     const result = { score, nodes };
     if (depth > 0) {
       transpositionTable.set(cacheKey, result);
@@ -110,7 +110,7 @@ const negamax = (
   }
 
   if (moves.length === 0) {
-    const score = evaluateBoard(board, turn, { perspective });
+    const score = evaluateBoard(board, { perspective });
     const result = { score, nodes };
     transpositionTable.set(cacheKey, result);
     return result;
