@@ -27,10 +27,10 @@ export default function StartDialog({ playerColor, onColorChange, onStart }: Sta
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="mx-4 w-full max-w-lg rounded-2xl border border-slate-700 bg-slate-600/60 p-4 shadow-2xl backdrop-blur-sm">
-        <div className="flex items-center justify-center gap-1 mb-6">
-          <img src={bloodlessIcon} alt="" className="h-16 w-16" />
-          <h2 className="text-6xl font-bold text-white" style={{ fontFamily: "'WDXLL Lubrifont JPN', sans-serif" }}>{t('title')}</h2>
+      <div className="mx-4 w-full max-w-lg rounded-2xl border border-slate-800 bg-slate-700/60 p-4 shadow-2xl">
+        <div className="flex items-center justify-center gap-1 mb-3">
+          <img src={bloodlessIcon} alt="" className="h-14 w-14" />
+          <h2 className="text-5xl font-bold text-white" style={{ fontFamily: "'WDXLL Lubrifont JPN', sans-serif" }}>{t('title')}</h2>
         </div>
 
         <div className="mb-2">
@@ -41,8 +41,8 @@ export default function StartDialog({ playerColor, onColorChange, onStart }: Sta
           <div className="flex justify-center gap-2">
             <label
               className={`flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${playerColor === 'WHITE'
-                  ? 'bg-slate-200 text-slate-900 border-slate-300'
-                  : 'bg-slate-700 text-slate-200 border-slate-500 hover:bg-slate-600'
+                ? 'bg-slate-200/60 text-slate-900 border-slate-300'
+                : 'bg-slate-700/60 text-slate-200 border-slate-500 hover:bg-slate-600/60'
                 }`}
             >
               <input
@@ -56,8 +56,8 @@ export default function StartDialog({ playerColor, onColorChange, onStart }: Sta
             </label>
             <label
               className={`flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${playerColor === 'BLACK'
-                  ? 'bg-slate-200 text-slate-900 border-slate-300'
-                  : 'bg-slate-700 text-slate-200 border-slate-500 hover:bg-slate-600'
+                ? 'bg-slate-200/60 text-slate-900 border-slate-300'
+                : 'bg-slate-700/60 text-slate-200 border-slate-500 hover:bg-slate-600/60'
                 }`}
             >
               <input
@@ -77,9 +77,9 @@ export default function StartDialog({ playerColor, onColorChange, onStart }: Sta
             {LEVELS.map((item) => (
               <label
                 key={item.level}
-                className={`flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${selectedLevel === item.level
-                  ? 'bg-slate-200 text-slate-900 border-slate-300'
-                  : 'bg-slate-700 text-slate-200 border-slate-500 hover:bg-slate-600'
+                className={`flex items-center gap-2 rounded-lg border p-2 text-sm font-medium transition-colors ${selectedLevel === item.level
+                  ? 'bg-slate-200/60 text-slate-900 border-slate-300'
+                  : 'bg-slate-700/60 text-slate-200 border-slate-500 hover:bg-slate-600/60'
                   }`}
               >
                 <input

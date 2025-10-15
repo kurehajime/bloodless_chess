@@ -10,14 +10,14 @@ export default function RulesDescription() {
   ];
 
   return (
-    <div className="rounded-lg bg-slate-800/30 p-4 text-sm text-slate-300">
+    <div className="rounded-lg bg-slate-800/30 p-2 text-sm text-slate-300">
       <h3 className="mb-3 font-semibold text-slate-200">{t('rules.title')}</h3>
-      <ul className="space-y-2 mb-4">
+      <ul className="space-y-1 mb-2">
         {(t('rules.list', { returnObjects: true }) as string[]).map((rule, index) => (
           <li key={index}>• {rule}</li>
         ))}
       </ul>
-      <h3 className="mb-3 font-semibold text-slate-200">{t('rules.pieces.title')}</h3>
+      <h3 className="mb-2 font-semibold text-slate-200">{t('rules.pieces.title')}</h3>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {pieces.map((piece) => (
           <div key={piece.symbol} className="flex flex-col items-center text-center">
