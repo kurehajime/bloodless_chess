@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import RulesDescription from './RulesDescription';
 import bloodlessIcon from '../assets/bloodless.png';
@@ -19,8 +20,9 @@ const LEVELS = [
 
 export default function StartDialog({ playerColor, onColorChange, onStart }: StartDialogProps) {
   const { t } = useTranslation();
-  const handleStart = (level: number) => {
-    onStart(level, playerColor);
+  const [selectedLevel, setSelectedLevel] = useState<number>(1);
+  const handleStart = () => {
+    onStart(selectedLevel, playerColor);
   };
 
   return (
@@ -31,12 +33,12 @@ export default function StartDialog({ playerColor, onColorChange, onStart }: Sta
           <h2 className="text-6xl font-bold text-white" style={{ fontFamily: "'WDXLL Lubrifont JPN', sans-serif" }}>{t('title')}</h2>
         </div>
 
-        <div className="mb-6">
+        <div className="mb-2">
           <RulesDescription />
         </div>
 
-        <div className="mb-3">
-          <div className="flex justify-center gap-4">
+        <div className="mb-2">
+          <div className="flex justify-center gap-2">
             <label className="flex items-center gap-2 rounded-lg border border-slate-500 bg-slate-700 px-3 py-2 text-sm text-slate-200">
               <input
                 type="radio"
@@ -60,19 +62,35 @@ export default function StartDialog({ playerColor, onColorChange, onStart }: Sta
           </div>
         </div>
 
-        <div className="mb-3">
-          <div className="flex gap-2 justify-center">
+        <div className="mb-2">
+          <div className="flex flex-wrap justify-center gap-2">
             {LEVELS.map((item) => (
-              <button
+              <label
                 key={item.level}
-                onClick={() => handleStart(item.level)}
-                className="rounded-lg border border-slate-500 bg-slate-700 px-5 py-3 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-200 hover:text-slate-900"
+                className={`flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${selectedLevel === item.level
+                  ? 'bg-slate-200 text-slate-900 border-slate-300'
+                  : 'bg-slate-700 text-slate-200 border-slate-500 hover:bg-slate-600'
+                  }`}
               >
+                <input
+                  type="radio"
+                  name="start-level"
+                  value={item.level}
+                  checked={selectedLevel === item.level}
+                  onChange={() => setSelectedLevel(item.level)}
+                />
                 {item.label}
-              </button>
+              </label>
             ))}
           </div>
         </div>
+
+        <button
+          onClick={handleStart}
+          className="mt-2 w-full rounded-xl bg-sky-500 py-3 text-lg font-semibold text-white transition-colors hover:bg-sky-400"
+        >
+          {t('start.play')}
+        </button>
       </div>
     </div>
   );
