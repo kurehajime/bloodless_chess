@@ -67,7 +67,7 @@ export const evaluateBoard = (board: Board, options: EvaluationOptions): number 
     evaluationCache.set(cacheKey, 10000);
     return 10000;
   }
-  const kingSafety = assessKingMobility(board, perspective, perspectiveMoves, enemyMoves);
+  const kingSafety = assessKingMobility(board, perspectiveMoves, enemyMoves);
 
   const total = baseScore + kingSafety + checkPenalty;
   evaluationCache.set(cacheKey, total);
@@ -98,7 +98,6 @@ const assessPieces = (board: Board, perspective: Turn): number => {
 // キングが安全に移動できるマス数を評価。逃げ道が多いほどプラス。
 const assessKingMobility = (
   board: Board,
-  perspective: Turn,
   perspectiveMoves: Move[],
   enemyMoves: Move[]
 ): number => {
