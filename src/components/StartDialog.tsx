@@ -15,7 +15,7 @@ const LEVELS = [
   { level: 2, label: 'Lv.2', depth: 2 },
   { level: 3, label: 'Lv.3', depth: 4 },
   { level: 4, label: 'Lv.4', depth: 6 },
-  { level: 5, label: 'Lv.5', depth: 8 },
+  // { level: 5, label: 'Lv.5', depth: 8 },
 ];
 
 export default function StartDialog({ playerColor, onColorChange, onStart }: StartDialogProps) {
@@ -40,11 +40,10 @@ export default function StartDialog({ playerColor, onColorChange, onStart }: Sta
         <div className="mb-2">
           <div className="flex justify-center gap-2">
             <label
-              className={`flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
-                playerColor === 'WHITE'
+              className={`flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${playerColor === 'WHITE'
                   ? 'bg-slate-200 text-slate-900 border-slate-300'
                   : 'bg-slate-700 text-slate-200 border-slate-500 hover:bg-slate-600'
-              }`}
+                }`}
             >
               <input
                 type="radio"
@@ -56,11 +55,10 @@ export default function StartDialog({ playerColor, onColorChange, onStart }: Sta
               {t('start.color.white')}
             </label>
             <label
-              className={`flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
-                playerColor === 'BLACK'
+              className={`flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${playerColor === 'BLACK'
                   ? 'bg-slate-200 text-slate-900 border-slate-300'
                   : 'bg-slate-700 text-slate-200 border-slate-500 hover:bg-slate-600'
-              }`}
+                }`}
             >
               <input
                 type="radio"
