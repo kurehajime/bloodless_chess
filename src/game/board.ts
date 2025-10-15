@@ -46,20 +46,32 @@ export const cloneCell = (cell: Cell): Cell => ({
 export const cloneBoard = (board: Board): Board =>
   board.map((row) => row.map((cell) => cloneCell(cell)));
 
-export const createInitialBoard = (): Board => {
+export const createInitialBoard = (playerColor: Turn = 'WHITE'): Board => {
   const board: Board = Array.from({ length: BOARD_SIZE }, () =>
     Array.from({ length: BOARD_SIZE }, () => createEmptyCell())
   );
 
-  board[0][0] = { base: ['BR'], jail: [], wait: [] };
-  board[0][1] = { base: ['BK'], jail: [], wait: [] };
-  board[0][2] = { base: ['BN'], jail: [], wait: [] };
-  board[0][3] = { base: ['BB'], jail: [], wait: [] };
+  if (playerColor === 'WHITE') {
+    board[0][0] = { base: ['BR'], jail: [], wait: [] };
+    board[0][1] = { base: ['BK'], jail: [], wait: [] };
+    board[0][2] = { base: ['BN'], jail: [], wait: [] };
+    board[0][3] = { base: ['BB'], jail: [], wait: [] };
 
-  board[3][0] = { base: ['WB'], jail: [], wait: [] };
-  board[3][1] = { base: ['WN'], jail: [], wait: [] };
-  board[3][2] = { base: ['WK'], jail: [], wait: [] };
-  board[3][3] = { base: ['WR'], jail: [], wait: [] };
+    board[3][0] = { base: ['WB'], jail: [], wait: [] };
+    board[3][1] = { base: ['WN'], jail: [], wait: [] };
+    board[3][2] = { base: ['WK'], jail: [], wait: [] };
+    board[3][3] = { base: ['WR'], jail: [], wait: [] };
+  } else {
+    board[0][0] = { base: ['WR'], jail: [], wait: [] };
+    board[0][1] = { base: ['WK'], jail: [], wait: [] };
+    board[0][2] = { base: ['WN'], jail: [], wait: [] };
+    board[0][3] = { base: ['WB'], jail: [], wait: [] };
+
+    board[3][0] = { base: ['BB'], jail: [], wait: [] };
+    board[3][1] = { base: ['BN'], jail: [], wait: [] };
+    board[3][2] = { base: ['BK'], jail: [], wait: [] };
+    board[3][3] = { base: ['BR'], jail: [], wait: [] };
+  }
 
   return board;
 };

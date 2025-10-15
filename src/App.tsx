@@ -2,24 +2,25 @@ import { useCallback, useEffect, useState, useRef } from 'react';
 import { useReward } from 'react-rewards';
 import { useTranslation } from 'react-i18next';
 import BoardComponent from './components/BoardComponent';
-import DifficultySelector, { getDifficultyDepth } from './components/DifficultySelector';
+import { getDifficultyDepth } from './components/DifficultySelector';
 import StartDialog from './components/StartDialog';
 import RulesDescription from './components/RulesDescription';
-import type { Position } from './game/board';
+import { createInitialBoard } from './game/board';
+import type { Position, Turn } from './game/board';
 import { GameManager } from './game/gameManager';
 import { GameAI } from './ai/GameAI';
-import type { Turn } from './game/board';
 import { serializeBoard } from './game/serialize';
 import bloodlessIcon from './assets/bloodless.png';
 
 function App() {
   const { t } = useTranslation();
-  const [manager, setManager] = useState(() => GameManager.create());
+  const [playerColor, setPlayerColor] = useState<Turn>('WHITE');
+  const [manager, setManager] = useState(() => GameManager.create(createInitialBoard('WHITE')));
   const [isThinking, setIsThinking] = useState(false);
   const [difficulty, setDifficulty] = useState(2);
   const [moveCount, setMoveCount] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
-  const aiTurn: Turn = 'BLACK';
+  const aiTurn: Turn = playerColor === 'WHITE' ? 'BLACK' : 'WHITE';
   const searchDepth = getDifficultyDepth(difficulty);
   const prevWinnerRef = useRef<Turn | 'DRAW' | null>(null);
 
@@ -55,10 +56,21 @@ function App() {
     setDifficulty(level);
   }, []);
 
-  const handleStart = useCallback((level: number) => {
-    setDifficulty(level);
-    setGameStarted(true);
+  const handleColorChange = useCallback((color: Turn) => {
+    setPlayerColor(color);
   }, []);
+
+  const handleStart = useCallback(
+    (level: number, color: Turn) => {
+      setPlayerColor(color);
+      setDifficulty(level);
+      setManager(GameManager.create(createInitialBoard(color)));
+      setMoveCount(0);
+      setGameStarted(true);
+      prevWinnerRef.current = null;
+    },
+    []
+  );
 
   const handleResign = useCallback(() => {
     const opponent = manager.turn === 'WHITE' ? 'BLACK' : 'WHITE';
@@ -66,11 +78,11 @@ function App() {
   }, [manager.turn]);
 
   const handleReplay = useCallback(() => {
-    setManager(GameManager.create());
+    setManager(GameManager.create(createInitialBoard(playerColor)));
     setMoveCount(0);
     setGameStarted(false);
     prevWinnerRef.current = null;
-  }, []);
+  }, [playerColor]);
 
   // 勝敗が確定したときに演出を実行
   useEffect(() => {
@@ -150,7 +162,13 @@ function App() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-slate-950 to-black px-0 sm:px-2 text-slate-100">
-      {!gameStarted && <StartDialog onStart={handleStart} />}
+      {!gameStarted && (
+        <StartDialog
+          playerColor={playerColor}
+          onColorChange={handleColorChange}
+          onStart={handleStart}
+        />
+      )}
       <span id="rewardWin" className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50" />
       <span id="rewardLose" className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50" />
       <section className="flex w-full max-w-4xl flex-col items-center gap-4 border border-slate-800/70 bg-slate-900/60 px-4 shadow-2xl">

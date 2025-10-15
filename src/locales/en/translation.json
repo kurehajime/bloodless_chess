@@ -41,6 +41,9 @@
     }
   },
   "start": {
-    "selectDifficulty": "Select Difficulty"
+    "color": {
+      "white": "White",
+      "black": "Black"
+    }
   }
 }

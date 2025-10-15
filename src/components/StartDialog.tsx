@@ -1,9 +1,12 @@
 import { useTranslation } from 'react-i18next';
 import RulesDescription from './RulesDescription';
 import bloodlessIcon from '../assets/bloodless.png';
+import type { Turn } from '../game/board';
 
 type StartDialogProps = {
-  onStart: (difficulty: number) => void;
+  playerColor: Turn;
+  onColorChange: (color: Turn) => void;
+  onStart: (difficulty: number, color: Turn) => void;
 };
 
 const LEVELS = [
@@ -14,10 +17,10 @@ const LEVELS = [
   { level: 5, label: 'Lv.5', depth: 8 },
 ];
 
-export default function StartDialog({ onStart }: StartDialogProps) {
+export default function StartDialog({ playerColor, onColorChange, onStart }: StartDialogProps) {
   const { t } = useTranslation();
   const handleStart = (level: number) => {
-    onStart(level);
+    onStart(level, playerColor);
   };
 
   return (
@@ -32,8 +35,32 @@ export default function StartDialog({ onStart }: StartDialogProps) {
           <RulesDescription />
         </div>
 
-        <div className="mb-6">
-          <h3 className="mb-3 text-center font-semibold text-slate-200">{t('start.selectDifficulty')}</h3>
+        <div className="mb-3">
+          <div className="flex justify-center gap-4">
+            <label className="flex items-center gap-2 rounded-lg border border-slate-500 bg-slate-700 px-3 py-2 text-sm text-slate-200">
+              <input
+                type="radio"
+                name="player-color"
+                value="WHITE"
+                checked={playerColor === 'WHITE'}
+                onChange={() => onColorChange('WHITE')}
+              />
+              {t('start.color.white')}
+            </label>
+            <label className="flex items-center gap-2 rounded-lg border border-slate-500 bg-slate-700 px-3 py-2 text-sm text-slate-200">
+              <input
+                type="radio"
+                name="player-color"
+                value="BLACK"
+                checked={playerColor === 'BLACK'}
+                onChange={() => onColorChange('BLACK')}
+              />
+              {t('start.color.black')}
+            </label>
+          </div>
+        </div>
+
+        <div className="mb-3">
           <div className="flex gap-2 justify-center">
             {LEVELS.map((item) => (
               <button
