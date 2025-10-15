@@ -39,7 +39,13 @@ export default function StartDialog({ playerColor, onColorChange, onStart }: Sta
 
         <div className="mb-2">
           <div className="flex justify-center gap-2">
-            <label className="flex items-center gap-2 rounded-lg border border-slate-500 bg-slate-700 px-3 py-2 text-sm text-slate-200">
+            <label
+              className={`flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
+                playerColor === 'WHITE'
+                  ? 'bg-slate-200 text-slate-900 border-slate-300'
+                  : 'bg-slate-700 text-slate-200 border-slate-500 hover:bg-slate-600'
+              }`}
+            >
               <input
                 type="radio"
                 name="player-color"
@@ -49,7 +55,13 @@ export default function StartDialog({ playerColor, onColorChange, onStart }: Sta
               />
               {t('start.color.white')}
             </label>
-            <label className="flex items-center gap-2 rounded-lg border border-slate-500 bg-slate-700 px-3 py-2 text-sm text-slate-200">
+            <label
+              className={`flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
+                playerColor === 'BLACK'
+                  ? 'bg-slate-200 text-slate-900 border-slate-300'
+                  : 'bg-slate-700 text-slate-200 border-slate-500 hover:bg-slate-600'
+              }`}
+            >
               <input
                 type="radio"
                 name="player-color"
