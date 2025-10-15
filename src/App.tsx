@@ -37,20 +37,28 @@ function App() {
     lifetime: 500,
   });
 
-  const handleCellClick = useCallback((position: Position) => {
-    setManager((prev) => {
-      const next = GameManager.handleCellClick(prev, position);
-      // 手が進んだ場合はカウント増加
-      if (next.turn !== prev.turn) {
-        setMoveCount((count) => count + 1);
+  const handleCellClick = useCallback(
+    (position: Position) => {
+      if (!gameStarted) {
+        return;
       }
-      return next;
-    });
-  }, []);
+      setManager((prev) => {
+        const next = GameManager.handleCellClick(prev, position);
+        if (next.turn !== prev.turn) {
+          setMoveCount((count) => count + 1);
+        }
+        return next;
+      });
+    },
+    [gameStarted]
+  );
 
   const handlePieceSelect = useCallback((pieceIndex: number) => {
+    if (!gameStarted) {
+      return;
+    }
     setManager((prev) => GameManager.selectPiece(prev, pieceIndex));
-  }, []);
+  }, [gameStarted]);
 
   const handleDifficultyChange = useCallback((level: number) => {
     setDifficulty(level);
@@ -99,7 +107,7 @@ function App() {
   }, [manager.winner, rewardWin, rewardLose]);
 
   useEffect(() => {
-    if (manager.winner || manager.turn !== aiTurn || manager.selection || isThinking) {
+    if (!gameStarted || manager.winner || manager.turn !== aiTurn || manager.selection || isThinking) {
       return;
     }
 
@@ -134,7 +142,7 @@ function App() {
       clearTimeout(timer);
       setIsThinking(false);
     };
-  }, [manager, aiTurn, searchDepth]);
+  }, [manager, aiTurn, searchDepth, gameStarted]);
 
   const turnLabel = manager.turn === 'WHITE' ? t('turn.white') : t('turn.black');
   const winnerLabel =
