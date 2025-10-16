@@ -174,7 +174,7 @@ const BoardComponent = ({
         waitPieces.forEach((entry, waitIndex) => {
           const waitX = waitPieces.length === 1 ? centerX : waitStartX + waitIndex * waitSpacing;
           pieceEntries.push({
-            key: `wait-${rowIndex}-${columnIndex}-${entry.piece}-${waitIndex}`,
+            key: `wait-${entry.piece}`,
             piece: entry.piece,
             x: waitX,
             y: centerY,
@@ -222,7 +222,7 @@ const BoardComponent = ({
         const cursor = handleClick ? 'pointer' : 'default';
 
         pieceEntries.push({
-          key: `base-${rowIndex}-${columnIndex}-${piece}-${pieceIndex}`,
+          key: `base-${piece}`,
           piece,
           x: pieceX,
           y: pieceY,
@@ -249,7 +249,7 @@ const BoardComponent = ({
         jailPieces.forEach((piece, jailIndex) => {
           const jailX = jailPieces.length === 1 ? centerX : jailStartX + jailIndex * jailSpacing;
           pieceEntries.push({
-            key: `jail-${rowIndex}-${columnIndex}-${piece}-${jailIndex}`,
+            key: `jail-${piece}`,
             piece,
             x: jailX,
             y: jailY,
