@@ -1,6 +1,4 @@
 import CellOverlayComponent from './CellOverlayComponent';
-import JailComponent from './JailComponent';
-import WaitComponent from './WaitComponent';
 import { Cell } from '../game/board';
 
 type CellComponentProps = {
@@ -64,8 +62,6 @@ const CellComponent = ({
         />
       )}
       {isValidMove && <CellOverlayComponent cellSize={cellSize} variant="move" />}
-      <WaitComponent waitPieces={cell.wait} cellSize={cellSize} />
-      <JailComponent pieces={cell.jail} cellSize={cellSize} />
       {isSelected && <CellOverlayComponent cellSize={cellSize} variant="selected" />}
     </g>
   );

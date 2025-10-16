@@ -87,10 +87,12 @@ const BoardComponent = ({
 
   const cellElements: JSX.Element[] = [];
   const pieceEntries: {
-    id: string;
+    key: string;
     piece: Piece;
     x: number;
     y: number;
+    fontSize: number;
+    fill: string;
     highlight: boolean;
     glow: boolean;
     onClick?: (event: MouseEvent<SVGGElement>) => void;
@@ -98,6 +100,7 @@ const BoardComponent = ({
     inCheck: boolean;
     movementType: 'normal' | 'capture';
     opacity: number;
+    rotation?: number;
   }[] = [];
 
   board.forEach((row, rowIndex) => {
@@ -161,6 +164,33 @@ const BoardComponent = ({
         />
       );
 
+      if (cell.wait.length > 0) {
+        const waitPieces = cell.wait;
+        const waitFontSize = cellSize * 0.52;
+        const waitMaxSpacing = cellSize * 0.45;
+        const waitSpacing = waitPieces.length > 1 ? Math.min(waitMaxSpacing, (cellSize * 0.9) / (waitPieces.length - 1)) : 0;
+        const waitStartX = centerX - (waitSpacing * (waitPieces.length - 1)) / 2;
+
+        waitPieces.forEach((entry, waitIndex) => {
+          const waitX = waitPieces.length === 1 ? centerX : waitStartX + waitIndex * waitSpacing;
+          pieceEntries.push({
+            key: `wait-${rowIndex}-${columnIndex}-${entry.piece}-${waitIndex}`,
+            piece: entry.piece,
+            x: waitX,
+            y: centerY,
+            fontSize: waitFontSize,
+            fill: '#0f172a',
+            highlight: false,
+            glow: false,
+            onClick: undefined,
+            cursor: 'default',
+            inCheck: false,
+            movementType: 'normal',
+            opacity: 0.42,
+          });
+        });
+      }
+
       cell.base.forEach((piece, pieceIndex) => {
         const pieceX = cell.base.length === 1 ? centerX : startX + pieceIndex * spacing;
         const pieceY = centerY;
@@ -192,10 +222,12 @@ const BoardComponent = ({
         const cursor = handleClick ? 'pointer' : 'default';
 
         pieceEntries.push({
-          id: piece,
+          key: `base-${rowIndex}-${columnIndex}-${piece}-${pieceIndex}`,
           piece,
           x: pieceX,
           y: pieceY,
+          fontSize: cellSize * 0.52,
+          fill: '#0f172a',
           highlight: isSelectedPiece,
           glow: shouldGlow,
           onClick: handleClick,
@@ -205,6 +237,34 @@ const BoardComponent = ({
           opacity: 1,
         });
       });
+
+      if (cell.jail.length > 0) {
+        const jailPieces = cell.jail;
+        const jailFontSize = cellSize * 0.28;
+        const jailSpacing = jailPieces.length > 1 ? jailFontSize * 1.1 : 0;
+        const jailTotalWidth = (jailPieces.length - 1) * jailSpacing;
+        const jailStartX = centerX - jailTotalWidth / 2;
+        const jailY = originY + cellSize * 0.78;
+
+        jailPieces.forEach((piece, jailIndex) => {
+          const jailX = jailPieces.length === 1 ? centerX : jailStartX + jailIndex * jailSpacing;
+          pieceEntries.push({
+            key: `jail-${rowIndex}-${columnIndex}-${piece}-${jailIndex}`,
+            piece,
+            x: jailX,
+            y: jailY,
+            fontSize: jailFontSize,
+            fill: '#0f172a',
+            highlight: false,
+            glow: false,
+            onClick: undefined,
+            cursor: 'default',
+            inCheck: false,
+            movementType: 'normal',
+            opacity: 1,
+          });
+        });
+      }
     });
   });
 
@@ -221,12 +281,13 @@ const BoardComponent = ({
       <g>
         {pieceEntries.map((entry) => (
           <PieceComponent
-            key={entry.id}
+            key={entry.key}
             piece={entry.piece}
             x={entry.x}
             y={entry.y}
-            fontSize={cellSize * 0.52}
-            fill="#0f172a"
+            fontSize={entry.fontSize}
+            fill={entry.fill}
+            rotation={entry.rotation}
             onClick={entry.onClick}
             highlight={entry.highlight}
             glow={entry.glow}
