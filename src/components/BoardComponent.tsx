@@ -131,7 +131,7 @@ const BoardComponent = ({
       };
 
       const cellInCheck = (whiteInCheck && cell.base.some((p) => p === 'WK')) ||
-                          (blackInCheck && cell.base.some((p) => p === 'BK'));
+        (blackInCheck && cell.base.some((p) => p === 'BK'));
 
       const originX = columnIndex * cellSize;
       const originY = rowIndex * cellSize;
@@ -208,15 +208,15 @@ const BoardComponent = ({
 
         const handleClick = (canTriggerCell || canSelectPiece)
           ? (event: MouseEvent<SVGGElement>) => {
-              event.stopPropagation();
-              if (canSelectPiece) {
-                handlePieceSelect(pieceIndex);
-                return;
-              }
-              if (canTriggerCell) {
-                handleCellClick();
-              }
+            event.stopPropagation();
+            if (canSelectPiece) {
+              handlePieceSelect(pieceIndex);
+              return;
             }
+            if (canTriggerCell) {
+              handleCellClick();
+            }
+          }
           : undefined;
 
         const cursor = handleClick ? 'pointer' : 'default';
@@ -262,6 +262,7 @@ const BoardComponent = ({
             inCheck: false,
             movementType: 'normal',
             opacity: 1,
+            rotation: 90,
           });
         });
       }

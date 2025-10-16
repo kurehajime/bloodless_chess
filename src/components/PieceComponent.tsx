@@ -49,6 +49,7 @@ const PieceComponent = ({
   const strokeWidth = highlight ? fontSize * 0.08 : fontSize * 0.06;
   const accentFill = highlight ? 'rgba(14, 165, 233, 0.28)' : 'rgba(59, 130, 246, 0.18)';
   const accentStroke = highlight ? 'rgba(14, 165, 233, 0.9)' : 'rgba(59, 130, 246, 0.5)';
+  const rotate = rotation ?? 0;
 
   const transitionPresets: Record<'normal' | 'capture', Transition> = {
     normal: { duration: 0.22, ease: [0.25, 0.1, 0.25, 1] },
@@ -65,14 +66,13 @@ const PieceComponent = ({
 
   return (
     <motion.g
-      initial={{ x, y }}
-      animate={{ x, y }}
+      initial={{ x, y, rotate }}
+      animate={{ x, y, rotate }}
       transition={transitionPresets[movementType]}
       onClick={onClick ? handleClick : undefined}
       style={{ cursor, transformOrigin: 'center' }}
     >
       <g
-        transform={rotation ? `rotate(${rotation} 0 0)` : undefined}
         className={shouldShake ? 'animate-shake' : undefined}
         style={{ transformOrigin: 'center' }}
       >
