@@ -1,9 +1,11 @@
-import { Board, BOARD_SIZE, Position, Turn } from '../game/board';
+import type { JSX, MouseEvent } from 'react';
+import { Board, BOARD_SIZE, Piece, Position, Turn, getPieceColor } from '../game/board';
 import { SelectionState } from '../game/gameManager';
 import type { Move } from '../game/rules';
 import { isInCheck } from '../game/rules';
 import CellComponent from './CellComponent';
 import SelectorComponent from './SelectorComponent';
+import PieceComponent from './PieceComponent';
 
 type BoardComponentProps = {
   board: Board;
@@ -83,6 +85,129 @@ const BoardComponent = ({
     );
   })();
 
+  const cellElements: JSX.Element[] = [];
+  const pieceEntries: {
+    id: string;
+    piece: Piece;
+    x: number;
+    y: number;
+    highlight: boolean;
+    glow: boolean;
+    onClick?: (event: MouseEvent<SVGGElement>) => void;
+    cursor: string;
+    inCheck: boolean;
+    movementType: 'normal' | 'capture';
+    opacity: number;
+  }[] = [];
+
+  board.forEach((row, rowIndex) => {
+    row.forEach((cell, columnIndex) => {
+      const positionKey = `${rowIndex}-${columnIndex}`;
+      const isSelected =
+        !!selection &&
+        selection.position.row === rowIndex &&
+        selection.position.column === columnIndex;
+      const isValidMove = selection?.pieceIndex !== null && validMoveKeys.has(positionKey);
+      const availablePieceIndexes = isSelected ? selection.availablePieceIndexes : [];
+      const selectedPieceIndex = isSelected ? selection.pieceIndex : null;
+      const selectionPending = isSelected && selection.pieceIndex === null;
+      const isLastMoveTo = lastMove?.to.row === rowIndex && lastMove?.to.column === columnIndex;
+
+      const handleCellClick = () => {
+        if (disabled || !onCellClick) {
+          return;
+        }
+        onCellClick({ row: rowIndex, column: columnIndex });
+      };
+
+      const handlePieceSelect = (pieceIndex: number) => {
+        if (disabled || !onPieceSelect) {
+          return;
+        }
+        onPieceSelect(pieceIndex);
+      };
+
+      const cellInCheck = (whiteInCheck && cell.base.some((p) => p === 'WK')) ||
+                          (blackInCheck && cell.base.some((p) => p === 'BK'));
+
+      const originX = columnIndex * cellSize;
+      const originY = rowIndex * cellSize;
+      const centerX = originX + cellSize / 2;
+      const centerY = originY + cellSize * 0.38;
+      const maxSpacing = cellSize * 0.45;
+      const spacing = cell.base.length > 1 ? Math.min(maxSpacing, (cellSize * 0.9) / (cell.base.length - 1)) : 0;
+      const startX = centerX - (spacing * (cell.base.length - 1)) / 2;
+
+      const movingPieceColor = isLastMoveTo && cell.base.length > 0 ? getPieceColor(cell.base[0]) : null;
+      const hasEnemyInJail =
+        !!movingPieceColor && cell.jail.some((piece) => getPieceColor(piece) !== movingPieceColor);
+
+      const showSelector =
+        selectionPending && availablePieceIndexes.length > 1 && typeof onPieceSelect === 'function';
+
+      cellElements.push(
+        <CellComponent
+          key={positionKey}
+          cell={cell}
+          row={rowIndex}
+          column={columnIndex}
+          cellSize={cellSize}
+          onClick={handleCellClick}
+          isSelected={isSelected}
+          isValidMove={isValidMove}
+          isLastMoveTo={isLastMoveTo}
+          disabled={disabled}
+          inCheck={cellInCheck}
+        />
+      );
+
+      cell.base.forEach((piece, pieceIndex) => {
+        const pieceX = cell.base.length === 1 ? centerX : startX + pieceIndex * spacing;
+        const pieceY = centerY;
+        const isSelectable =
+          !disabled &&
+          !showSelector &&
+          typeof onPieceSelect === 'function' &&
+          availablePieceIndexes.includes(pieceIndex);
+        const isSelectedPiece = selectedPieceIndex === pieceIndex;
+        const shouldGlow = selectionPending && isSelectable && selectedPieceIndex === null;
+        const movementType = isLastMoveTo && pieceIndex === 0 && hasEnemyInJail ? 'capture' : 'normal';
+
+        const canTriggerCell = !disabled && typeof onCellClick === 'function';
+        const canSelectPiece = isSelectable && typeof onPieceSelect === 'function';
+
+        const handleClick = (canTriggerCell || canSelectPiece)
+          ? (event: MouseEvent<SVGGElement>) => {
+              event.stopPropagation();
+              if (canSelectPiece) {
+                handlePieceSelect(pieceIndex);
+                return;
+              }
+              if (canTriggerCell) {
+                handleCellClick();
+              }
+            }
+          : undefined;
+
+        const cursor = handleClick ? 'pointer' : 'default';
+
+        pieceEntries.push({
+          id: piece,
+          piece,
+          x: pieceX,
+          y: pieceY,
+          highlight: isSelectedPiece,
+          glow: shouldGlow,
+          onClick: handleClick,
+          cursor,
+          inCheck: cellInCheck,
+          movementType,
+          opacity: 1,
+        });
+      });
+    });
+  });
+
   return (
     <svg
       role="img"
@@ -92,57 +217,26 @@ const BoardComponent = ({
       className="mx-auto block rounded-2xl bg-slate-800/30 shadow-2xl ring-1 ring-slate-900/40"
       style={{ maxWidth: '100%', height: 'auto' }}
     >
-      {board.map((row, rowIndex) =>
-        row.map((cell, columnIndex) => {
-          const positionKey = `${rowIndex}-${columnIndex}`;
-          const isSelected =
-            !!selection &&
-            selection.position.row === rowIndex &&
-            selection.position.column === columnIndex;
-          const isValidMove = selection?.pieceIndex !== null && validMoveKeys.has(positionKey);
-          const availablePieceIndexes = isSelected ? selection.availablePieceIndexes : [];
-          const selectedPieceIndex = isSelected ? selection.pieceIndex : null;
-          const selectionPending = isSelected && selection.pieceIndex === null;
-          const isLastMoveTo = lastMove?.to.row === rowIndex && lastMove?.to.column === columnIndex;
-
-          const handleCellClick = () => {
-            if (disabled || !onCellClick) {
-              return;
-            }
-            onCellClick({ row: rowIndex, column: columnIndex });
-          };
-
-          const handlePieceSelect = (pieceIndex: number) => {
-            if (disabled || !onPieceSelect) {
-              return;
-            }
-            onPieceSelect(pieceIndex);
-          };
-
-          const cellInCheck = (whiteInCheck && cell.base.some(p => p === 'WK')) ||
-                              (blackInCheck && cell.base.some(p => p === 'BK'));
-
-          return (
-            <CellComponent
-              key={positionKey}
-              cell={cell}
-              row={rowIndex}
-              column={columnIndex}
-              cellSize={cellSize}
-              onClick={handleCellClick}
-              isSelected={isSelected}
-              isValidMove={isValidMove}
-              isLastMoveTo={isLastMoveTo}
-              selectionPending={selectionPending}
-              availablePieceIndexes={availablePieceIndexes}
-              selectedPieceIndex={selectedPieceIndex}
-              onSelectPiece={isSelected ? handlePieceSelect : undefined}
-              disabled={disabled}
-              inCheck={cellInCheck}
-            />
-          );
-        })
-      )}
+      {cellElements}
+      <g>
+        {pieceEntries.map((entry) => (
+          <PieceComponent
+            key={entry.id}
+            piece={entry.piece}
+            x={entry.x}
+            y={entry.y}
+            fontSize={cellSize * 0.52}
+            fill="#0f172a"
+            onClick={entry.onClick}
+            highlight={entry.highlight}
+            glow={entry.glow}
+            opacity={entry.opacity}
+            inCheck={entry.inCheck}
+            movementType={entry.movementType}
+            cursor={entry.cursor}
+          />
+        ))}
+      </g>
       {selectorOverlay}
       {overlayMessage ? (
         <g

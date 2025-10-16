@@ -1,4 +1,3 @@
-import BaseComponent from './BaseComponent';
 import CellOverlayComponent from './CellOverlayComponent';
 import JailComponent from './JailComponent';
 import WaitComponent from './WaitComponent';
@@ -13,10 +12,6 @@ type CellComponentProps = {
   isSelected?: boolean;
   isValidMove?: boolean;
   isLastMoveTo?: boolean;
-  selectionPending?: boolean;
-  availablePieceIndexes?: number[];
-  selectedPieceIndex?: number | null;
-  onSelectPiece?: (pieceIndex: number) => void;
   disabled?: boolean;
   inCheck?: boolean;
 };
@@ -30,10 +25,6 @@ const CellComponent = ({
   isSelected = false,
   isValidMove = false,
   isLastMoveTo = false,
-  selectionPending = false,
-  availablePieceIndexes = [],
-  selectedPieceIndex = null,
-  onSelectPiece,
   disabled = false,
   inCheck = false,
 }: CellComponentProps) => {
@@ -50,9 +41,6 @@ const CellComponent = ({
     }
     onClick();
   };
-
-  const showSelector =
-    selectionPending && availablePieceIndexes.length > 1 && typeof onSelectPiece === 'function';
 
   return (
     <g transform={`translate(${x} ${y})`} onClick={handleClick} style={{ cursor }}>
@@ -77,15 +65,6 @@ const CellComponent = ({
       )}
       {isValidMove && <CellOverlayComponent cellSize={cellSize} variant="move" />}
       <WaitComponent waitPieces={cell.wait} cellSize={cellSize} />
-      <BaseComponent
-        pieces={cell.base}
-        cellSize={cellSize}
-        availablePieceIndexes={availablePieceIndexes}
-        selectedPieceIndex={selectedPieceIndex}
-        selectionPending={selectionPending}
-        onSelectPiece={showSelector ? undefined : onSelectPiece}
-        inCheck={inCheck}
-      />
       <JailComponent pieces={cell.jail} cellSize={cellSize} />
       {isSelected && <CellOverlayComponent cellSize={cellSize} variant="selected" />}
     </g>
