@@ -10,6 +10,7 @@ export const resetEvaluationCache = (): void => {
 
 type EvaluationOptions = {
   perspective: Turn;
+  gentle?: boolean;
 };
 
 // コマ種別ごとの基本ポイント。チェスの一般的な価値を目安に採用。
@@ -20,8 +21,8 @@ const PIECE_VALUES: Record<string, number> = {
 };
 
 export const evaluateBoard = (board: Board, options: EvaluationOptions): number => {
-  const { perspective } = options;
-  const cacheKey = composeBoardCacheKey(board, perspective);
+  const { perspective, gentle = false } = options;
+  const cacheKey = `${composeBoardCacheKey(board, perspective)}|${gentle ? 'gentle' : 'standard'}`;
   const cached = evaluationCache.get(cacheKey);
   if (cached !== undefined) {
     return cached;
@@ -30,17 +31,19 @@ export const evaluateBoard = (board: Board, options: EvaluationOptions): number 
   const enemyTurn = perspective === 'WHITE' ? 'BLACK' : 'WHITE';
 
   // キングが捕縛されているなら詰みとして極端なスコアを返す。
-  const isPerspectiveCheckmated = isKingCaptured(board, perspective);
-  const isEnemyCheckmated = isKingCaptured(board, enemyTurn);
+  if (!gentle) {
+    const isPerspectiveCheckmated = isKingCaptured(board, perspective);
+    const isEnemyCheckmated = isKingCaptured(board, enemyTurn);
 
-  if (isPerspectiveCheckmated) {
-    evaluationCache.set(cacheKey, -10000);
-    return -10000;
-  }
+    if (isPerspectiveCheckmated) {
+      evaluationCache.set(cacheKey, -10000);
+      return -10000;
+    }
 
-  if (isEnemyCheckmated) {
-    evaluationCache.set(cacheKey, 10000);
-    return 10000;
+    if (isEnemyCheckmated) {
+      evaluationCache.set(cacheKey, 10000);
+      return 10000;
+    }
   }
 
   const baseScore = assessPieces(board, perspective);
@@ -50,24 +53,30 @@ export const evaluateBoard = (board: Board, options: EvaluationOptions): number 
   const enemyInCheck = isInCheck(board, enemyTurn);
 
   let checkPenalty = 0;
-  if (perspectiveInCheck) {
-    checkPenalty -= 5;
-  }
-  if (enemyInCheck) {
-    checkPenalty += 5;
+  if (!gentle) {
+    if (perspectiveInCheck) {
+      checkPenalty -= 5;
+    }
+    if (enemyInCheck) {
+      checkPenalty += 5;
+    }
   }
 
   const perspectiveMoves = enumerateMoves(board, perspective);
   const enemyMoves = enumerateMoves(board, enemyTurn);
-  if (perspectiveMoves.length === 0 && perspectiveInCheck) {
-    evaluationCache.set(cacheKey, -10000);
-    return -10000;
+
+  if (!gentle) {
+    if (perspectiveMoves.length === 0 && perspectiveInCheck) {
+      evaluationCache.set(cacheKey, -10000);
+      return -10000;
+    }
+    if (enemyMoves.length === 0 && enemyInCheck) {
+      evaluationCache.set(cacheKey, 10000);
+      return 10000;
+    }
   }
-  if (enemyMoves.length === 0 && enemyInCheck) {
-    evaluationCache.set(cacheKey, 10000);
-    return 10000;
-  }
-  const kingSafety = assessKingMobility(board, perspectiveMoves, enemyMoves);
+
+  const kingSafety = gentle ? 0 : assessKingMobility(board, perspectiveMoves, enemyMoves);
 
   const total = baseScore + kingSafety + checkPenalty;
   evaluationCache.set(cacheKey, total);

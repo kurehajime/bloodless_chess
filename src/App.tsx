@@ -118,6 +118,7 @@ function App() {
       const { move } = GameAI.decide(manager.board, manager.turn, {
         depth: searchDepth,
         perspective: aiTurn,
+        gentle: difficulty === 0,
       });
 
       if (!cancelled) {
@@ -142,7 +143,7 @@ function App() {
       clearTimeout(timer);
       setIsThinking(false);
     };
-  }, [manager, aiTurn, searchDepth, gameStarted]);
+  }, [manager, aiTurn, searchDepth, gameStarted, difficulty]);
 
   const turnLabel = manager.turn === 'WHITE' ? t('turn.white') : t('turn.black');
   const winnerLabel =
