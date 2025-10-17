@@ -29,7 +29,7 @@ export const evaluateBoard = (board: Board, options: EvaluationOptions): number 
   }
 
   const enemyTurn = perspective === 'WHITE' ? 'BLACK' : 'WHITE';
-  const baseScore = assessPieces(board, perspective);
+  const baseScore = assessPieces(board, perspective, gentle);
   if (gentle) {
     evaluationCache.set(cacheKey, baseScore);
     return baseScore;
@@ -82,24 +82,29 @@ export const evaluateBoard = (board: Board, options: EvaluationOptions): number 
 };
 
 // Base/Waitにある駒数からスコアを算出する。
-const assessPieces = (board: Board, perspective: Turn): number => {
+const assessPieces = (board: Board, perspective: Turn, gentle: boolean): number => {
   let score = 0;
 
   board.forEach((row) => {
     row.forEach((cell) => {
       cell.base.forEach((piece) => {
-        const value = getPieceValue(piece, perspective, 2);
+        const value = gentle ? getGentlePieceValue(piece, perspective) : getPieceValue(piece, perspective, 2);
         score += value;
       });
 
       cell.wait.forEach((entry) => {
-        const value = getPieceValue(entry.piece, perspective, 1);
+        const value = gentle ? getGentlePieceValue(entry.piece, perspective) : getPieceValue(entry.piece, perspective, 1);
         score += value;
       });
     });
   });
 
   return score;
+};
+
+const getGentlePieceValue = (piece: Piece, perspective: Turn): number => {
+  const isPerspectivePiece = getPieceColor(piece) === perspective;
+  return isPerspectivePiece ? 1 : -1;
 };
 
 // キングが安全に移動できるマス数を評価。逃げ道が多いほどプラス。
