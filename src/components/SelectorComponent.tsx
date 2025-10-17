@@ -157,6 +157,7 @@ const SelectorComponent = ({
               y={optionHeight / 2}
               fontSize={fontSize}
               fill={fill}
+              cursor="pointer"
             />
           </g>
         );

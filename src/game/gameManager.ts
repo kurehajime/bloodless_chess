@@ -77,6 +77,10 @@ export class GameManager {
       return manager;
     }
 
+    if (selection.pieceIndex === pieceIndex) {
+      return this.deselect(manager);
+    }
+
     const validMoves = rulesGetValidMovesForPiece(board, position, pieceIndex, turn);
     const nextSelection: SelectionState = {
       position,
