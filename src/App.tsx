@@ -197,7 +197,7 @@ function App() {
         </header>
         <div className="flex items-center gap-4">
           <div className="text-sm text-slate-400">
-            {t('difficulty.label', { level: difficulty })}
+            {t('difficulty.label', { level: difficulty + 1 })}
           </div>
           {!manager.winner && gameStarted && (
             <button

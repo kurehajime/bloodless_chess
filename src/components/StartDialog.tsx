@@ -11,16 +11,15 @@ type StartDialogProps = {
 };
 
 const LEVELS = [
-  { level: 1, label: 'Lv.1', depth: 1 },
-  { level: 2, label: 'Lv.2', depth: 2 },
-  { level: 3, label: 'Lv.3', depth: 4 },
-  { level: 4, label: 'Lv.4', depth: 6 },
-  // { level: 5, label: 'Lv.5', depth: 8 },
+  { level: 0, label: 'レベル1', depth: 1 },
+  { level: 1, label: 'レベル2', depth: 1 },
+  { level: 2, label: 'レベル3', depth: 2 },
+  { level: 3, label: 'レベル4', depth: 4 },
 ];
 
 export default function StartDialog({ playerColor, onColorChange, onStart }: StartDialogProps) {
   const { t } = useTranslation();
-  const [selectedLevel, setSelectedLevel] = useState<number>(1);
+  const [selectedLevel, setSelectedLevel] = useState<number>(LEVELS[0].level);
   const handleStart = () => {
     onStart(selectedLevel, playerColor);
   };

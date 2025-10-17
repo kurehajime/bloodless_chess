@@ -5,15 +5,14 @@ type DifficultySelectorProps = {
 };
 
 const LEVELS = [
-  { level: 1, label: 'レベル1', depth: 1 },
-  { level: 2, label: 'レベル2', depth: 2 },
-  { level: 3, label: 'レベル3', depth: 4 },
-  { level: 4, label: 'レベル4', depth: 6 },
-  { level: 5, label: 'レベル5', depth: 8 },
+  { level: 0, label: 'レベル1', depth: 1 },
+  { level: 1, label: 'レベル2', depth: 1 },
+  { level: 2, label: 'レベル3', depth: 2 },
+  { level: 3, label: 'レベル4', depth: 4 },
 ];
 
 export const getDifficultyDepth = (level: number): number => {
-  return LEVELS.find((l) => l.level === level)?.depth ?? 2;
+  return LEVELS.find((l) => l.level === level)?.depth ?? LEVELS[0].depth;
 };
 
 export default function DifficultySelector({
