@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { BOARD_SIZE, Board, Cell, Turn, createEmptyCell } from './board';
+import { evaluateBoard } from './evaluator';
 import { Move, enumerateMoves, isInCheck, resolveMove } from './rules';
 import { serializeBoard } from './serialize';
 
@@ -67,5 +68,34 @@ describe('resolveMove', () => {
     }
 
     expect(winner).toBe('DRAW');
+  });
+
+  it('ステイルメイトは引き分けになる', () => {
+    const board = createBoard();
+    board[0][0] = cell(['WK']);
+    board[0][2] = cell(['BN']);
+    board[1][2] = cell(['BB']);
+    board[2][1] = cell(['BK']);
+
+    const move: Move = { from: { row: 0, column: 2 }, to: { row: 2, column: 3 }, pieceIndex: 0 };
+    const result = resolveMove(board, 'BLACK', null, move, { skipLog: true });
+
+    expect(result.winner).toBe('DRAW');
+    expect(isInCheck(result.board, 'WHITE')).toBe(false);
+    expect(enumerateMoves(result.board, 'WHITE')).toHaveLength(0);
+  });
+
+  it('ステイルメイトの盤面評価は0になる', () => {
+    const board = createBoard();
+    board[0][0] = cell(['WK']);
+    board[1][2] = cell(['BB']);
+    board[2][1] = cell(['BK']);
+    board[2][3] = cell(['BN']);
+
+    const score = evaluateBoard(board, { perspective: 'WHITE' });
+    const enemyScore = evaluateBoard(board, { perspective: 'BLACK' });
+
+    expect(score).toBe(0);
+    expect(enemyScore).toBe(0);
   });
 });

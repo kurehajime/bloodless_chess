@@ -169,8 +169,13 @@ export const resolveMove = (
 
   if (!winner && !skipCheckmateCheck) {
     const nextPlayerMoves = enumerateMoves(boardCopy, nextTurn);
-    if (nextPlayerMoves.length === 0 && isInCheck(boardCopy, nextTurn)) {
-      winner = turn;
+    if (nextPlayerMoves.length === 0) {
+      const nextPlayerInCheck = isInCheck(boardCopy, nextTurn);
+      if (nextPlayerInCheck) {
+        winner = turn;
+      } else {
+        winner = 'DRAW';
+      }
     }
   }
 

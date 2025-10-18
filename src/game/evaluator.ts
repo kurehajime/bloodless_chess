@@ -65,13 +65,15 @@ export const evaluateBoard = (board: Board, options: EvaluationOptions): number 
   const perspectiveMoves = enumerateMoves(board, perspective);
   const enemyMoves = enumerateMoves(board, enemyTurn);
 
-  if (perspectiveMoves.length === 0 && perspectiveInCheck) {
-    evaluationCache.set(cacheKey, -10000);
-    return -10000;
+  if (perspectiveMoves.length === 0) {
+    const score = perspectiveInCheck ? -10000 : 0;
+    evaluationCache.set(cacheKey, score);
+    return score;
   }
-  if (enemyMoves.length === 0 && enemyInCheck) {
-    evaluationCache.set(cacheKey, 10000);
-    return 10000;
+  if (enemyMoves.length === 0) {
+    const score = enemyInCheck ? 10000 : 0;
+    evaluationCache.set(cacheKey, score);
+    return score;
   }
 
   const kingSafety = assessKingMobility(board, perspectiveMoves, enemyMoves);
