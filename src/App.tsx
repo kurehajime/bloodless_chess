@@ -82,7 +82,9 @@ function App() {
 
   const handleResign = useCallback(() => {
     const opponent = manager.turn === 'WHITE' ? 'BLACK' : 'WHITE';
-    setManager((prev) => GameManager.from(prev.board, prev.turn, null, opponent, prev.lastMove, prev.repetitionCounts));
+    setManager((prev) =>
+      GameManager.from(prev.board, prev.turn, null, opponent, null, prev.lastMove, prev.repetitionCounts)
+    );
   }, [manager.turn]);
 
   const handleReplay = useCallback(() => {
@@ -129,7 +131,7 @@ function App() {
           // 合法手がない場合はチェックメイト（負け）
           const opponent = manager.turn === 'WHITE' ? 'BLACK' : 'WHITE';
           setManager((prev) =>
-            GameManager.from(prev.board, prev.turn, null, opponent, prev.lastMove, prev.repetitionCounts)
+            GameManager.from(prev.board, prev.turn, null, opponent, null, prev.lastMove, prev.repetitionCounts)
           );
         }
         setIsThinking(false);
@@ -146,13 +148,19 @@ function App() {
   }, [manager, aiTurn, searchDepth, gameStarted, difficulty]);
 
   const turnLabel = manager.turn === 'WHITE' ? t('turn.white') : t('turn.black');
+  const drawKeySuffix =
+    manager.drawReason === 'REPETITION'
+      ? 'repetition'
+      : manager.drawReason === 'STALEMATE'
+      ? 'stalemate'
+      : 'generic';
   const winnerLabel =
     manager.winner === 'WHITE'
       ? t('winner.white')
       : manager.winner === 'BLACK'
       ? t('winner.black')
       : manager.winner === 'DRAW'
-      ? t('winner.draw')
+      ? t(`winner.draw.${drawKeySuffix}`)
       : null;
   const winnerOverlayMessage =
     manager.winner === 'WHITE'
@@ -160,7 +168,7 @@ function App() {
       : manager.winner === 'BLACK'
       ? 'Black Wins!'
       : manager.winner === 'DRAW'
-      ? 'Draw Game'
+      ? t(`overlay.draw.${drawKeySuffix}`)
       : null;
   const repetitionKey = `${serializeBoard(manager.board)}|${manager.turn}`;
   const repetitionCount = manager.repetitionCounts.get(repetitionKey) ?? 0;

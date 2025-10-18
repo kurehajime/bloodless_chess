@@ -1,6 +1,6 @@
 import { Board, Position, Turn, cloneBoard, createInitialBoard, getPieceColor } from './board';
 import { serializeBoard } from './serialize';
-import type { Move } from './rules';
+import type { DrawReason, Move } from './rules';
 import {
   enumerateMoves as enumerateLegalMoves,
   getValidMovesForPiece as rulesGetValidMovesForPiece,
@@ -20,6 +20,7 @@ export class GameManager {
     public readonly turn: Turn,
     public readonly selection: SelectionState | null,
     public readonly winner: Turn | 'DRAW' | null,
+    public readonly drawReason: DrawReason | null,
     public readonly lastMove: Move | null = null,
     public readonly repetitionCounts: Map<string, number> = new Map()
   ) {}
@@ -28,7 +29,7 @@ export class GameManager {
     const board = initialBoard ? cloneBoard(initialBoard) : createInitialBoard();
     const counts = new Map<string, number>();
     counts.set(`${serializeBoard(board)}|WHITE`, 1);
-    return new GameManager(board, 'WHITE', null, null, null, counts);
+    return new GameManager(board, 'WHITE', null, null, null, null, counts);
   }
 
   static from(
@@ -36,6 +37,7 @@ export class GameManager {
     turn: Turn,
     selection: SelectionState | null,
     winner: Turn | 'DRAW' | null,
+    drawReason: DrawReason | null,
     lastMove: Move | null = null,
     repetitionCounts?: Map<string, number>
   ) {
@@ -43,7 +45,7 @@ export class GameManager {
     if (counts.size === 0) {
       counts.set(`${serializeBoard(board)}|${turn}`, 1);
     }
-    return new GameManager(cloneBoard(board), turn, selection, winner, lastMove, counts);
+    return new GameManager(cloneBoard(board), turn, selection, winner, drawReason, lastMove, counts);
   }
 
   static handleCellClick(manager: GameManager, position: Position): GameManager {
@@ -88,14 +90,23 @@ export class GameManager {
       pieceIndex,
       validMoves,
     };
-    return new GameManager(manager.board, manager.turn, nextSelection, manager.winner, manager.lastMove, manager.repetitionCounts);
+    return new GameManager(
+      manager.board,
+      manager.turn,
+      nextSelection,
+      manager.winner,
+      manager.drawReason,
+      manager.lastMove,
+      manager.repetitionCounts
+    );
   }
 
   static applyMove(manager: GameManager, move: Move): GameManager {
     const result = resolveBoardMove(manager.board, manager.turn, manager.winner, move, {
       repetitionCounts: manager.repetitionCounts,
+      currentDrawReason: manager.drawReason,
     });
-    return new GameManager(result.board, result.turn, null, result.winner, move, result.repetitionCounts);
+    return new GameManager(result.board, result.turn, null, result.winner, result.drawReason, move, result.repetitionCounts);
   }
 
   static enumerateMoves(manager: GameManager): Move[] {
@@ -138,7 +149,15 @@ export class GameManager {
         pieceIndex,
         validMoves,
       };
-      return new GameManager(board, turn, selection, manager.winner, manager.lastMove, manager.repetitionCounts);
+      return new GameManager(
+        board,
+        turn,
+        selection,
+        manager.winner,
+        manager.drawReason,
+        manager.lastMove,
+        manager.repetitionCounts
+      );
     }
 
     const selection: SelectionState = {
@@ -147,7 +166,15 @@ export class GameManager {
       pieceIndex: null,
       validMoves: [],
     };
-    return new GameManager(board, turn, selection, manager.winner, manager.lastMove, manager.repetitionCounts);
+    return new GameManager(
+      board,
+      turn,
+      selection,
+      manager.winner,
+      manager.drawReason,
+      manager.lastMove,
+      manager.repetitionCounts
+    );
   }
 
   private static moveTo(manager: GameManager, destination: Position): GameManager {
@@ -164,16 +191,25 @@ export class GameManager {
 
     const result = resolveBoardMove(manager.board, manager.turn, manager.winner, move, {
       repetitionCounts: manager.repetitionCounts,
+      currentDrawReason: manager.drawReason,
     });
-    return new GameManager(result.board, result.turn, null, result.winner, move, result.repetitionCounts);
+    return new GameManager(result.board, result.turn, null, result.winner, result.drawReason, move, result.repetitionCounts);
   }
 
   private static deselect(manager: GameManager): GameManager {
     if (!manager.selection) {
       return manager;
     }
-    return new GameManager(manager.board, manager.turn, null, manager.winner, manager.lastMove, manager.repetitionCounts);
-}
+    return new GameManager(
+      manager.board,
+      manager.turn,
+      null,
+      manager.winner,
+      manager.drawReason,
+      manager.lastMove,
+      manager.repetitionCounts
+    );
+  }
 }
 
 const positionsEqual = (a: Position, b: Position): boolean =>

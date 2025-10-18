@@ -7,7 +7,11 @@
   "winner": {
     "white": "白の勝ち",
     "black": "黒の勝ち",
-    "draw": "引き分け"
+    "draw": {
+      "generic": "引き分け",
+      "repetition": "千日手で引き分け",
+      "stalemate": "ステイルメイトで引き分け"
+    }
   },
   "difficulty": {
     "label": "難易度: レベル{{level}}"
@@ -18,6 +22,13 @@
   },
   "ai": {
     "thinking": "AIが思考中です…"
+  },
+  "overlay": {
+    "draw": {
+      "generic": "引き分け",
+      "repetition": "Draw(threefold)",
+      "stalemate": "Draw(stalemate)"
+    }
   },
   "repetition": {
     "label": "(同一局面{{count}}回)"

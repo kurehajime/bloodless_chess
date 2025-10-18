@@ -19,10 +19,13 @@ export type Move = {
   pieceIndex: number;
 };
 
+export type DrawReason = 'REPETITION' | 'STALEMATE';
+
 export type ResolveMoveResult = {
   board: Board;
   turn: Turn;
   winner: Turn | null | 'DRAW';
+  drawReason: DrawReason | null;
   repetitionCounts: Map<string, number>;
 };
 
@@ -30,6 +33,7 @@ type ResolveMoveOptions = {
   skipCheckmateCheck?: boolean;
   skipLog?: boolean;
   repetitionCounts?: Map<string, number>;
+  currentDrawReason?: DrawReason | null;
 };
 
 export const WAIT_SKIP_TURNS = 1;
@@ -79,7 +83,12 @@ export const resolveMove = (
   move: Move,
   options: ResolveMoveOptions = {}
 ): ResolveMoveResult => {
-  const { skipCheckmateCheck = false, skipLog = false, repetitionCounts: baseCounts } = options;
+  const {
+    skipCheckmateCheck = false,
+    skipLog = false,
+    repetitionCounts: baseCounts,
+    currentDrawReason = null,
+  } = options;
   const repetitionCounts = new Map(baseCounts ?? []);
   const boardCopy = cloneBoard(board);
   const sourceCell = boardCopy[move.from.row][move.from.column];
@@ -90,6 +99,7 @@ export const resolveMove = (
       board: boardCopy,
       turn,
       winner: currentWinner,
+      drawReason: currentWinner === 'DRAW' ? currentDrawReason : null,
       repetitionCounts,
     };
   }
@@ -163,6 +173,10 @@ export const resolveMove = (
   const didCaptureKing = updatedDestinationCell.jail.includes(enemyKing as Piece);
 
   let winner: Turn | null | 'DRAW' = didCaptureKing ? turn : currentWinner;
+  let drawReason: DrawReason | null = currentWinner === 'DRAW' ? currentDrawReason : null;
+  if (didCaptureKing) {
+    drawReason = null;
+  }
   const nextTurn = didCaptureKing ? turn : toggleTurn(turn);
 
   progressWaitPieces(boardCopy, turn, nextTurn);
@@ -173,8 +187,10 @@ export const resolveMove = (
       const nextPlayerInCheck = isInCheck(boardCopy, nextTurn);
       if (nextPlayerInCheck) {
         winner = turn;
+        drawReason = null;
       } else {
         winner = 'DRAW';
+        drawReason = 'STALEMATE';
       }
     }
   }
@@ -186,13 +202,14 @@ export const resolveMove = (
 
   if (!winner && updatedCount >= 3) {
     winner = 'DRAW';
+    drawReason = 'REPETITION';
   }
 
   if (!skipLog) {
     logBoard(boardCopy);
   }
 
-  return { board: boardCopy, turn: nextTurn, winner, repetitionCounts };
+  return { board: boardCopy, turn: nextTurn, winner, drawReason, repetitionCounts };
 };
 
 const computeValidMoves = (

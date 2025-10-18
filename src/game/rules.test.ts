@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { BOARD_SIZE, Board, Cell, Turn, createEmptyCell } from './board';
 import { evaluateBoard } from './evaluator';
+import type { DrawReason } from './rules';
 import { Move, enumerateMoves, isInCheck, resolveMove } from './rules';
 import { serializeBoard } from './serialize';
 
@@ -29,6 +30,7 @@ describe('resolveMove', () => {
     expect(isInCheck(result.board, 'WHITE')).toBe(true);
     expect(enumerateMoves(result.board, 'WHITE')).toHaveLength(0);
     expect(result.winner).toBe('BLACK');
+    expect(result.drawReason).toBeNull();
   });
 
   it('同一局面が3回出現したら引き分けになる', () => {
@@ -40,6 +42,7 @@ describe('resolveMove', () => {
     let turn: Turn = 'WHITE';
     let winner: Turn | 'DRAW' | null = null;
     let counts = new Map<string, number>();
+    let drawReason: DrawReason | null = null;
     counts.set(`${serializeBoard(currentBoard)}|${turn}`, 1);
 
     const playMove = (move: Move) => {
@@ -48,6 +51,7 @@ describe('resolveMove', () => {
       turn = result.turn;
       winner = result.winner;
       counts = result.repetitionCounts;
+      drawReason = result.drawReason;
       return result;
     };
 
@@ -68,6 +72,7 @@ describe('resolveMove', () => {
     }
 
     expect(winner).toBe('DRAW');
+    expect(drawReason).toBe('REPETITION');
   });
 
   it('ステイルメイトは引き分けになる', () => {
@@ -81,6 +86,7 @@ describe('resolveMove', () => {
     const result = resolveMove(board, 'BLACK', null, move, { skipLog: true });
 
     expect(result.winner).toBe('DRAW');
+    expect(result.drawReason).toBe('STALEMATE');
     expect(isInCheck(result.board, 'WHITE')).toBe(false);
     expect(enumerateMoves(result.board, 'WHITE')).toHaveLength(0);
   });
