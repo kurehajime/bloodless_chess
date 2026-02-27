@@ -10,22 +10,23 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "framer-motion": "^12.23.24",
-    "i18next": "^25.5.3",
+    "framer-motion": "^12.34.3",
+    "i18next": "^25.8.13",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "react-i18next": "^16.0.0",
+    "react-i18next": "^16.5.4",
     "react-rewards": "^2.1.0"
   },
   "devDependencies": {
+    "@types/node": "^22.19.13",
     "@types/react": "18.2.55",
     "@types/react-dom": "18.2.19",
-    "@vitejs/plugin-react": "4.2.1",
-    "autoprefixer": "10.4.17",
-    "postcss": "8.4.35",
+    "@vitejs/plugin-react": "^5.1.4",
+    "autoprefixer": "^10.4.27",
+    "postcss": "^8.5.6",
     "tailwindcss": "3.4.3",
-    "typescript": "5.4.2",
-    "vite": "5.2.8",
-    "vitest": "^3.2.4"
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1",
+    "vitest": "^4.0.18"
   }
 }

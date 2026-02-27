@@ -7,8 +7,20 @@
     "allowSyntheticDefaultImports": true,
     "baseUrl": ".",
     "paths": {
-      "scheduler/tracing": ["./scheduler-tracing.d.ts"]
-    }
+      "scheduler/tracing": [
+        "./scheduler-tracing.d.ts"
+      ]
+    },
+    "lib": [
+      "ESNext",
+      "ESNext.Disposable",
+      "DOM"
+    ],
+    "types": [
+      "node"
+    ]
   },
-  "include": ["vite.config.ts"]
+  "include": [
+    "vite.config.ts"
+  ]
 }
