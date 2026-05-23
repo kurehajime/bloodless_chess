@@ -13,7 +13,7 @@ updates:
     schedule:
       interval: "weekly"
     cooldown:
-      default-days: 2
+      default-days: 7
     groups:
       all-npm-security-updates:
         applies-to: "security-updates"
@@ -26,7 +26,7 @@ updates:
     schedule:
       interval: "weekly"
     cooldown:
-      default-days: 2
+      default-days: 7
     groups:
       all-github-actions-security-updates:
         applies-to: "security-updates"
